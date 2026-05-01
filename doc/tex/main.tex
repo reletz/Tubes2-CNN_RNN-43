@@ -1,0 +1,61 @@
+% !TEX root = main.tex
+
+\documentclass{report}
+\input{preamble}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Tugas Besar II IF3270 Pembelajaran Mesin},
+}
+
+\begin{document}
+
+% --- Cover ---
+\begin{titlepage}
+    \centering
+    
+    \Large \textsf{Tugas Besar I IF3270 Pembelajaran Mesin} \\
+    \vspace{1.5cm}
+
+    \huge \textbf{Implementasi \textit{Convolutional Neural Network} \& \textit{Recurrent Neural Network} \textit{From Scratch}} \\
+    \vspace{1.5cm}
+
+    \includegraphics[width=0.4\textwidth]{cover.png} \\ 
+    \vspace{1.5cm}
+
+    \large \textit{Disusun oleh: Kelompok JujurDiacak} \\
+    \vspace{0.5cm}
+    
+    \begin{tabular}{r l}
+        Clarissa Nethania Tambunan & 13523137 \\
+        Andi Farhan Hidayat & 13523128 \\
+        Naufarrel Zhafif Abhista & 13523149
+    \end{tabular}
+
+    \vfill
+
+    \large
+    Program Studi Teknik Informatika \\
+    Sekolah Teknik Elektro dan Informatika \\
+    Institut Teknologi Bandung \\
+    2026
+\end{titlepage}
+
+\pagenumbering{roman}
+\tableofcontents
+\newpage
+
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+\input{contents/01-pendahuluan}
+\input{contents/02-pembahasan}
+\input{contents/03-hasil-pengujian}
+\input{contents/04-kesimpulan}
+\input{contents/05-pembagian-tugas}
+\input{contents/06-referensi}
+
+\end{document}
