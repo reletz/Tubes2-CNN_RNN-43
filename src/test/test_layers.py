@@ -454,5 +454,69 @@ class TestDataflow:
         assert flat_out.shape == (1, 3 * 3 * 3)
 
 
+class TestImageCaptioner:
+    """Unit tests for ImageCaptioner builder."""
+
+    def test_forward_rnn_shape(self):
+        vocab_size = 12
+        embed_dim = 7
+        hidden_units = 5
+        batch = 3
+        seq_len = 4
+
+        model = recurrent_module  # alias
+        from src.nn.models.caption_model import ImageCaptioner
+
+        cap = ImageCaptioner(vocab_size=vocab_size, embed_dim=embed_dim, hidden_units=hidden_units, decoder_kind="rnn", num_recurrent_layers=2)
+        cap.set_embedding_weights(np.random.randn(vocab_size, embed_dim).astype(np.float32))
+        cap.set_image_projection_weights(np.random.randn(10, embed_dim).astype(np.float32), np.random.randn(embed_dim).astype(np.float32))
+        cap.set_output_weights(np.random.randn(hidden_units, vocab_size).astype(np.float32), np.random.randn(vocab_size).astype(np.float32))
+
+        # set recurrent layer weights
+        cap.set_recurrent_layer_weights(0, np.random.randn(embed_dim, hidden_units).astype(np.float32), np.random.randn(hidden_units, hidden_units).astype(np.float32), np.random.randn(hidden_units).astype(np.float32))
+        cap.set_recurrent_layer_weights(1, np.random.randn(hidden_units, hidden_units).astype(np.float32), np.random.randn(hidden_units, hidden_units).astype(np.float32), np.random.randn(hidden_units).astype(np.float32))
+
+        image_features = np.random.randn(batch, 10).astype(np.float32)
+        token_ids = np.random.randint(0, vocab_size, size=(batch, seq_len)).astype(np.int32)
+
+        out = cap.forward(image_features, token_ids)
+        assert out.shape == (batch, seq_len + 1, vocab_size)
+
+    def test_forward_lstm_shape(self):
+        vocab_size = 8
+        embed_dim = 6
+        hidden_units = 4
+        batch = 2
+        seq_len = 3
+
+        from src.nn.models.caption_model import ImageCaptioner
+
+        cap = ImageCaptioner(vocab_size=vocab_size, embed_dim=embed_dim, hidden_units=hidden_units, decoder_kind="lstm", num_recurrent_layers=1)
+        cap.set_embedding_weights(np.random.randn(vocab_size, embed_dim).astype(np.float32))
+        cap.set_image_projection_weights(np.random.randn(9, embed_dim).astype(np.float32), np.random.randn(embed_dim).astype(np.float32))
+        cap.set_output_weights(np.random.randn(hidden_units, vocab_size).astype(np.float32), np.random.randn(vocab_size).astype(np.float32))
+        cap.set_recurrent_layer_weights(0, np.random.randn(embed_dim, 4 * hidden_units).astype(np.float32), np.random.randn(hidden_units, 4 * hidden_units).astype(np.float32), np.random.randn(4 * hidden_units).astype(np.float32))
+
+        image_features = np.random.randn(batch, 9).astype(np.float32)
+        token_ids = np.random.randint(0, vocab_size, size=(batch, seq_len)).astype(np.int32)
+
+        out = cap.forward(image_features, token_ids)
+        assert out.shape == (batch, seq_len + 1, vocab_size)
+
+    def test_missing_output_weights_raises(self):
+        from src.nn.models.caption_model import ImageCaptioner
+
+        cap = ImageCaptioner(vocab_size=5, embed_dim=4, hidden_units=3, decoder_kind="rnn", num_recurrent_layers=1)
+        cap.set_embedding_weights(np.random.randn(5, 4).astype(np.float32))
+        cap.set_image_projection_weights(np.random.randn(7, 4).astype(np.float32), np.random.randn(4).astype(np.float32))
+        cap.set_recurrent_layer_weights(0, np.random.randn(4, 3).astype(np.float32), np.random.randn(3, 3).astype(np.float32), np.random.randn(3).astype(np.float32))
+
+        image_features = np.random.randn(1, 7).astype(np.float32)
+        token_ids = np.random.randint(0, 5, size=(1, 2)).astype(np.int32)
+
+        with pytest.raises(ValueError, match="Output weights are not set"):
+            cap.forward(image_features, token_ids)
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
