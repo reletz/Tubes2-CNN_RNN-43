@@ -156,27 +156,29 @@ class ImageCaptioner:
         token_embeddings = self.embedding.forward(token_ids)  # (batch, seq_len, embed_dim)
 
         # Pre-inject sequence: x_-1 = image projection, followed by token embeddings.
+        # sequence is a list of (batch, embed_dim) arrays.
         sequence = [projected_image] + [token_embeddings[:, t, :] for t in range(token_embeddings.shape[1])]
 
         states = self._initialize_states(batch_size)
         outputs: list[np.ndarray] = []
 
         for x_t in sequence:
-            layer_input = x_t
+            current_input = x_t
             for idx, layer in enumerate(self.recurrent_layers):
                 state = states[idx]
                 if isinstance(layer, SimpleRNNCell):
-                    state.h = layer.forward(layer_input, state.h)
-                    layer_input = state.h
+                    state.h = layer.forward(current_input, state.h)
+                    current_input = state.h
                 else:
                     assert state.c is not None
-                    state.h, state.c = layer.forward(layer_input, state.h, state.c)
-                    layer_input = state.h
+                    state.h, state.c = layer.forward(current_input, state.h, state.c)
+                    current_input = state.h
 
             if self.output_kernel is None or self.output_bias is None:
                 raise ValueError("Output weights are not set")
 
-            logits = layer_input @ self.output_kernel + self.output_bias
+            # current_input is the output of the last recurrent layer: (batch, hidden_units)
+            logits = current_input @ self.output_kernel + self.output_bias
             outputs.append(logits)
 
         return np.stack(outputs, axis=1)
