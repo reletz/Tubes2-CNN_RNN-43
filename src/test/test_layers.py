@@ -88,6 +88,22 @@ class TestConv2D:
         with pytest.raises(ValueError, match="weights are not set"):
             conv.forward(x)
 
+    def test_backward_shape(self):
+        """Test Conv2D backward returns input-shaped gradients."""
+        conv = conv_module.Conv2D(filters=2, kernel_size=(3, 3), padding="valid")
+        kernel = np.ones((3, 3, 1, 2), dtype=np.float32)
+        bias = np.zeros(2, dtype=np.float32)
+        conv.set_weights(kernel, bias)
+
+        x = np.ones((1, 5, 5, 1), dtype=np.float32)
+        out = conv.forward(x)
+        grad_out = np.ones_like(out)
+        grad_in = conv.backward(grad_out)
+
+        assert grad_in.shape == x.shape, f"Expected {x.shape}, got {grad_in.shape}"
+        assert conv.kernel_gradients.shape == kernel.shape
+        assert conv.bias_gradients.shape == bias.shape
+
 
 class TestLocallyConnected2D:
     """Test LocallyConnected2D layer."""
@@ -211,6 +227,24 @@ class TestPooling:
         out = mp.forward(x)
 
         assert out.shape == (1, 4, 4, 1), f"Expected (1,4,4,1), got {out.shape}"
+
+    def test_maxpool2d_backward_shape(self):
+        """Test MaxPool2D backward returns input-shaped gradients."""
+        mp = pool_module.MaxPool2D(pool_size=(2, 2))
+
+        x = np.array(
+            [[[[1.0], [2.0], [3.0], [4.0]],
+              [[5.0], [6.0], [7.0], [8.0]],
+              [[9.0], [10.0], [11.0], [12.0]],
+              [[13.0], [14.0], [15.0], [16.0]]]],
+            dtype=np.float32,
+        )
+        out = mp.forward(x)
+        grad_out = np.ones_like(out)
+        grad_in = mp.backward(grad_out)
+
+        assert grad_in.shape == x.shape, f"Expected {x.shape}, got {grad_in.shape}"
+        assert np.isclose(grad_in.sum(), grad_out.sum())
 
 
 class TestFlatten:
@@ -395,6 +429,33 @@ class TestRecurrent:
         assert c1.shape == (batch_size, units)
         assert h2.shape == (batch_size, units)
         assert c2.shape == (batch_size, units)
+
+    def test_lstm_backward_shape(self):
+        """Test LSTMCell backward returns all expected gradient shapes."""
+        units = 4
+        input_dim = 3
+        batch_size = 2
+
+        layer = recurrent_module.LSTMCell(units)
+        kernel = np.random.randn(input_dim, 4 * units).astype(np.float32)
+        recurrent_kernel = np.random.randn(units, 4 * units).astype(np.float32)
+        bias = np.random.randn(4 * units).astype(np.float32)
+        layer.set_weights(kernel, recurrent_kernel, bias)
+
+        x = np.random.randn(batch_size, input_dim).astype(np.float32)
+        h_prev, c_prev = layer.get_initial_state(batch_size)
+        h_out, c_out = layer.forward(x, h_prev, c_prev)
+
+        grad_h = np.ones_like(h_out)
+        grad_c = np.ones_like(c_out)
+        dx, dh_prev, dc_prev = layer.backward(grad_h, grad_c)
+
+        assert dx.shape == x.shape, f"Expected {x.shape}, got {dx.shape}"
+        assert dh_prev.shape == h_prev.shape, f"Expected {h_prev.shape}, got {dh_prev.shape}"
+        assert dc_prev.shape == c_prev.shape, f"Expected {c_prev.shape}, got {dc_prev.shape}"
+        assert layer.kernel_gradients.shape == kernel.shape
+        assert layer.recurrent_kernel_gradients.shape == recurrent_kernel.shape
+        assert layer.bias_gradients.shape == bias.shape
 
 
 class TestDataflow:

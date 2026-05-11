@@ -121,6 +121,10 @@ class ImageCaptioner:
         image_features = np.asarray(image_features, dtype=np.float32)
         return image_features @ self.image_projection_kernel + self.image_projection_bias
 
+    def _ensure_output_weights(self) -> None:
+        if self.output_kernel is None or self.output_bias is None:
+            raise ValueError("Output weights are not set")
+
     def _initialize_states(self, batch_size: int) -> list[_LayerState]:
         states: list[_LayerState] = []
         for layer in self.recurrent_layers:
@@ -139,6 +143,7 @@ class ImageCaptioner:
         sequence = [projected_image] + [token_embeddings[:, t, :] for t in range(token_embeddings.shape[1])]
         states = self._initialize_states(batch_size)
         outputs = []
+        self._ensure_output_weights()
         for x_t in sequence:
             curr = x_t
             for idx, layer in enumerate(self.recurrent_layers):
@@ -174,6 +179,7 @@ class ImageCaptioner:
     ) -> list[list[int]]:
         """Vectorized greedy decoding for batches."""
         batch_size = image_features.shape[0]
+        self._ensure_output_weights()
         curr = self._project_image(image_features)
         states = self._initialize_states(batch_size)
         
@@ -220,6 +226,7 @@ class ImageCaptioner:
                 for i in range(image_features.shape[0])]
 
     def _beam_search_single(self, image_features, start_token, end_token, beam_width, max_len):
+        self._ensure_output_weights()
         curr = self._project_image(image_features)
         states = self._initialize_states(1)
         for idx, layer in enumerate(self.recurrent_layers):

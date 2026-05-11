@@ -37,6 +37,13 @@ class Conv2D:
         # kernel shape is (kH, kW, C_in, filters)
         self.kernel: np.ndarray | None = None
         self.bias: np.ndarray | None = None
+        self.kernel_gradients: np.ndarray | None = None
+        self.bias_gradients: np.ndarray | None = None
+        self._input_cache: np.ndarray | None = None
+        self._padded_input_cache: np.ndarray | None = None
+        self._pad_h: Tuple[int, int] | None = None
+        self._pad_w: Tuple[int, int] | None = None
+        self._output_shape: Tuple[int, int, int, int] | None = None
 
     def set_weights(self, kernel: np.ndarray, bias: np.ndarray | None = None) -> None:
         self.kernel = np.asarray(kernel)
@@ -47,6 +54,7 @@ class Conv2D:
         if self.kernel is None:
             raise ValueError("Conv2D weights are not set. Call set_weights() first.")
 
+        self._input_cache = np.asarray(x)
         N, H, W, C = x.shape
         kH, kW, Ck, out_filters = self.kernel.shape
         if Ck != C:
@@ -59,9 +67,15 @@ class Conv2D:
             pad_w = _compute_padding(W, kW, stride_w)
             x_padded = np.pad(x, ((0, 0), pad_h, pad_w, (0, 0)), mode="constant")
         elif self.padding == "valid":
+            pad_h = (0, 0)
+            pad_w = (0, 0)
             x_padded = x
         else:
             raise ValueError("padding must be 'valid' or 'same'")
+
+        self._padded_input_cache = np.asarray(x_padded)
+        self._pad_h = pad_h
+        self._pad_w = pad_w
 
         H_p, W_p = x_padded.shape[1], x_padded.shape[2]
         out_h = (H_p - kH) // stride_h + 1
@@ -84,7 +98,57 @@ class Conv2D:
                 raise ValueError("bias is expected but not set")
             out += self.bias.reshape((1, 1, 1, -1))
 
+        self._output_shape = out.shape
+
         return out
+
+    def backward(self, grad_output: np.ndarray) -> np.ndarray:
+        if self.kernel is None:
+            raise ValueError("Conv2D weights are not set. Call set_weights() first.")
+        if self._padded_input_cache is None or self._output_shape is None:
+            raise ValueError("Conv2D.backward() called before forward().")
+
+        grad_output = np.asarray(grad_output, dtype=np.float32)
+        if grad_output.shape != self._output_shape:
+            raise ValueError(f"Expected grad_output shape {self._output_shape}, got {grad_output.shape}")
+
+        x_padded = self._padded_input_cache
+        N, H_p, W_p, C = x_padded.shape
+        kH, kW, Ck, out_filters = self.kernel.shape
+        stride_h, stride_w = self.strides
+        out_h, out_w = self._output_shape[1], self._output_shape[2]
+        k_flat = kH * kW * C
+
+        kernel_flat = self.kernel.reshape(k_flat, out_filters)
+        grad_kernel_flat = np.zeros_like(kernel_flat, dtype=np.float32)
+        grad_input_padded = np.zeros_like(x_padded, dtype=np.float32)
+
+        for out_i in range(out_h):
+            h_start = out_i * stride_h
+            h_slice = slice(h_start, h_start + kH)
+            for out_j in range(out_w):
+                w_start = out_j * stride_w
+                w_slice = slice(w_start, w_start + kW)
+
+                patch = x_padded[:, h_slice, w_slice, :].reshape(N, k_flat)
+                grad_slice = grad_output[:, out_i, out_j, :]
+
+                grad_kernel_flat += patch.T @ grad_slice
+                grad_patch = grad_slice @ kernel_flat.T
+                grad_input_padded[:, h_slice, w_slice, :] += grad_patch.reshape(N, kH, kW, C)
+
+        self.kernel_gradients = grad_kernel_flat.reshape(self.kernel.shape)
+        if self.use_bias:
+            self.bias_gradients = grad_output.sum(axis=(0, 1, 2))
+        else:
+            self.bias_gradients = None
+
+        if self.padding == "same":
+            pad_top, pad_bottom = self._pad_h or (0, 0)
+            pad_left, pad_right = self._pad_w or (0, 0)
+            return grad_input_padded[:, pad_top : H_p - pad_bottom, pad_left : W_p - pad_right, :]
+
+        return grad_input_padded
 
 
 class LocallyConnected2D:
