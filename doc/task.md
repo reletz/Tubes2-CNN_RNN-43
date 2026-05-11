@@ -248,7 +248,7 @@ README.md
 - [DONE] `recurrent.py`: `LSTM` cell (forget/input/output gates + cell state)
 
 ### Phase 3 — Model Builders
-- [ ] `cnn_model.py`: `CNNClassifier` builder class
+- [DONE] `cnn_model.py`: `CNNClassifier` builder class
 - [DONE] `caption_model.py`: `ImageCaptioner` encoder-decoder pre-inject builder class
 
 ### Phase 4 — Keras Training
