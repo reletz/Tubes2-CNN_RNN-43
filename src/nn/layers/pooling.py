@@ -18,10 +18,12 @@ def _pool2d(x: np.ndarray, pool_size: Tuple[int, int], strides: Tuple[int, int],
     # windows shape: (N, H-kH+1, W-kW+1, kH, kW, C)
     windows = windows[:, ::sH, ::sW, ...]  # (N, out_h, out_w, kH, kW, C)
 
+    # sliding_window_view returns shape (N, out_h, out_w, C, kH, kW)
+    # reduce over the last two axes (kH, kW) to preserve channel axis
     if mode == "max":
-        return np.max(windows, axis=(3, 4))
+        return np.max(windows, axis=(-2, -1))
     elif mode == "avg":
-        return np.mean(windows, axis=(3, 4))
+        return np.mean(windows, axis=(-2, -1))
     else:
         raise ValueError("mode must be 'max' or 'avg'")
 
