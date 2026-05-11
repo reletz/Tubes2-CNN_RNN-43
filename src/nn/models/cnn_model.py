@@ -244,3 +244,82 @@ class CNNClassifier:
 		"""Alias for forward()."""
 		return self.forward(x)
 
+	def _backprop_to_last_conv(self, class_index: int) -> np.ndarray:
+		if not self.intermediate_activations:
+			raise ValueError("Grad-CAM requires a prior forward() call")
+		if self.output_layer.weights is None:
+			raise ValueError("Output weights are not set")
+
+		logits = self.output_layer.z_cache
+		if logits is None:
+			raise ValueError("Grad-CAM requires output-layer caches from forward()")
+
+		grad_logits = np.zeros_like(logits, dtype=np.float32)
+		grad_logits[:, int(class_index)] = 1.0
+
+		grad = grad_logits @ self.output_layer.weights.T
+		grad = self.head_layer.backward(grad)
+
+		last_pool = self.pool_layers[-1]
+		if last_pool is not None:
+			grad = last_pool.backward(grad)
+
+		return grad
+
+	def grad_cam(
+		self,
+		x: np.ndarray,
+		class_index: int | None = None,
+		normalize: bool = True,
+	) -> tuple[np.ndarray, int, np.ndarray]:
+		"""Compute a Grad-CAM heatmap for a single input image.
+
+		Returns:
+			heatmap: 2D array in the last conv spatial resolution.
+			class_index: The target class used for the map.
+			probabilities: Model output probabilities for the input.
+		"""
+		x = np.asarray(x, dtype=np.float32)
+		if x.ndim == 3:
+			x = x[None, ...]
+		if x.ndim != 4 or x.shape[0] != 1:
+			raise ValueError("Grad-CAM expects a single image with shape (H,W,C) or (1,H,W,C)")
+
+		probabilities = self.forward(x)
+		target_class = int(np.argmax(probabilities[0])) if class_index is None else int(class_index)
+
+		last_conv_activations = self.intermediate_activations[-1][0]
+		gradients = self._backprop_to_last_conv(target_class)[0]
+		weights = gradients.mean(axis=(0, 1))
+		heatmap = np.sum(last_conv_activations * weights[None, None, :], axis=-1)
+		heatmap = np.maximum(heatmap, 0.0)
+
+		if normalize:
+			peak = float(np.max(heatmap))
+			if peak > 0:
+				heatmap = heatmap / peak
+
+		return heatmap.astype(np.float32), target_class, probabilities[0]
+
+	def grad_cam_overlay(
+		self,
+		x: np.ndarray,
+		class_index: int | None = None,
+		alpha: float = 0.45,
+	) -> tuple[np.ndarray, np.ndarray, int, np.ndarray]:
+		"""Return an overlay image and raw heatmap for a single input image."""
+		from src.utils.gradcam import overlay_heatmap, resize_heatmap
+
+		x_arr = np.asarray(x, dtype=np.float32)
+		if x_arr.ndim == 3:
+			image = x_arr
+		elif x_arr.ndim == 4 and x_arr.shape[0] == 1:
+			image = x_arr[0]
+		else:
+			raise ValueError("Grad-CAM expects a single image with shape (H,W,C) or (1,H,W,C)")
+
+		heatmap, target_class, probabilities = self.grad_cam(x_arr, class_index=class_index)
+		resized = resize_heatmap(heatmap, image.shape[:2])
+		overlay = overlay_heatmap(image, resized, alpha=alpha)
+		return overlay, resized, target_class, probabilities
+

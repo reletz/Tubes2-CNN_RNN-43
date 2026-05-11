@@ -261,10 +261,10 @@ README.md
 
 ### Phase 6 — Bonus (High Priority)
 - [DONE] **Batch Inference**: refactor semua layer ops untuk support batch dim `(B,...)` via `einsum`/`tensordot`
-- [ ] **Backprop**: implement `backward()` untuk Conv2D, MaxPooling, LSTM cell
+- [DONE] **Backprop**: implement `backward()` untuk Conv2D, MaxPooling, LSTM cell
 - [DONE] **Init-Inject**: arsitektur alternatif — image feature via Add/Concatenate setelah LSTM; bandingkan BLEU-4 vs pre-inject (Keras + scratch)
 - [DONE] **Beam Search**: ganti Greedy Decode di Notebook 4 dengan Beam Search (K=3 atau K=5); bandingkan kualitas caption
-- [ ] **Grad-CAM**: gradients dari last conv layer → heatmap overlay pada gambar asli; + visualisasi intermediate feature maps
+- [DONE] **Grad-CAM**: gradients dari last conv layer → heatmap overlay pada gambar asli; + visualisasi intermediate feature maps
 
 ### Phase 7 — Deliverables
 - [ ] Tulis seluruh section laporan sesuai struktur di atas

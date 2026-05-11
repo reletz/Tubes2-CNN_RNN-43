@@ -82,16 +82,87 @@ class AvgPool2D:
     def __init__(self, pool_size: Tuple[int, int] = (2, 2), strides: Tuple[int, int] | None = None):
         self.pool_size = (int(pool_size[0]), int(pool_size[1]))
         self.strides = strides if strides is not None else self.pool_size
+        self._input_cache: np.ndarray | None = None
 
     def forward(self, x: np.ndarray) -> np.ndarray:
+        self._input_cache = np.asarray(x)
         return _pool2d(x, self.pool_size, tuple(self.strides), mode="avg")
+
+    def backward(self, grad_output: np.ndarray) -> np.ndarray:
+        if self._input_cache is None:
+            raise ValueError("AvgPool2D.backward() called before forward().")
+
+        x = self._input_cache
+        grad_output = np.asarray(grad_output, dtype=np.float32)
+        N, H, W, C = x.shape
+        kH, kW = self.pool_size
+        sH, sW = tuple(self.strides)
+        out_h = (H - kH) // sH + 1
+        out_w = (W - kW) // sW + 1
+
+        if grad_output.shape != (N, out_h, out_w, C):
+            raise ValueError(f"Expected grad_output shape {(N, out_h, out_w, C)}, got {grad_output.shape}")
+
+        grad_input = np.zeros_like(x, dtype=np.float32)
+        scale = 1.0 / (kH * kW)
+
+        for out_i in range(out_h):
+            h_start = out_i * sH
+            h_slice = slice(h_start, h_start + kH)
+            for out_j in range(out_w):
+                w_start = out_j * sW
+                w_slice = slice(w_start, w_start + kW)
+                grad_input[:, h_slice, w_slice, :] += grad_output[:, out_i, out_j, :][:, None, None, :] * scale
+
+        return grad_input
 
 
 class GlobalAvgPooling2D:
+    def __init__(self) -> None:
+        self._input_cache: np.ndarray | None = None
+
     def forward(self, x: np.ndarray) -> np.ndarray:
+        self._input_cache = np.asarray(x)
         return np.mean(x, axis=(1, 2))
+
+    def backward(self, grad_output: np.ndarray) -> np.ndarray:
+        if self._input_cache is None:
+            raise ValueError("GlobalAvgPooling2D.backward() called before forward().")
+
+        x = self._input_cache
+        grad_output = np.asarray(grad_output, dtype=np.float32)
+        N, H, W, C = x.shape
+        if grad_output.shape != (N, C):
+            raise ValueError(f"Expected grad_output shape {(N, C)}, got {grad_output.shape}")
+
+        return np.broadcast_to(grad_output[:, None, None, :] / (H * W), (N, H, W, C)).copy()
 
 
 class GlobalMaxPooling2D:
+    def __init__(self) -> None:
+        self._input_cache: np.ndarray | None = None
+        self._output_cache: np.ndarray | None = None
+
     def forward(self, x: np.ndarray) -> np.ndarray:
-        return np.max(x, axis=(1, 2))
+        self._input_cache = np.asarray(x)
+        out = np.max(x, axis=(1, 2))
+        self._output_cache = out
+        return out
+
+    def backward(self, grad_output: np.ndarray) -> np.ndarray:
+        if self._input_cache is None or self._output_cache is None:
+            raise ValueError("GlobalMaxPooling2D.backward() called before forward().")
+
+        x = self._input_cache
+        out = self._output_cache
+        grad_output = np.asarray(grad_output, dtype=np.float32)
+        N, H, W, C = x.shape
+        if grad_output.shape != (N, C):
+            raise ValueError(f"Expected grad_output shape {(N, C)}, got {grad_output.shape}")
+
+        grad_input = np.zeros_like(x, dtype=np.float32)
+        max_mask = x == out[:, None, None, :]
+        counts = max_mask.sum(axis=(1, 2), keepdims=True)
+        counts = np.where(counts == 0, 1.0, counts)
+        grad_input += max_mask * (grad_output[:, None, None, :] / counts)
+        return grad_input

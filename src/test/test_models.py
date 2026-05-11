@@ -6,6 +6,8 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from src.utils.gradcam import overlay_heatmap, resize_heatmap
+
 
 def _load_module(module_name: str, file_path: str):
     """Load a module from file path to avoid package import issues."""
@@ -119,6 +121,41 @@ class TestCNNClassifier:
 
         with pytest.raises(ValueError, match="Expected input shape"):
             model.forward(np.random.randn(8, 8).astype(np.float32))
+
+    def test_gradcam_heatmap_and_overlay_shape(self):
+        """Test Grad-CAM helper returns a valid heatmap and overlay."""
+        np.random.seed(21)
+
+        model = cnn_model_module.CNNClassifier(
+            input_shape=(8, 8, 3),
+            num_classes=4,
+            conv_blocks=(
+                cnn_model_module.ConvBlockSpec(filters=2, kernel_size=(3, 3), padding="same"),
+            ),
+            conv_kind="conv",
+            pool_kind="max",
+            head_kind="flatten",
+        )
+
+        model.set_conv_weights(
+            0,
+            np.random.randn(3, 3, 3, 2).astype(np.float32),
+            np.random.randn(2).astype(np.float32),
+        )
+        model.set_output_weights(
+            np.random.randn(32, 4).astype(np.float32),
+            np.random.randn(4).astype(np.float32),
+        )
+
+        image = np.random.rand(8, 8, 3).astype(np.float32)
+        heatmap, class_index, probabilities = model.grad_cam(image)
+        overlay = overlay_heatmap(image, resize_heatmap(heatmap, image.shape[:2]))
+
+        assert heatmap.shape == (8, 8)
+        assert overlay.shape == image.shape
+        assert 0 <= class_index < 4
+        assert probabilities.shape == (4,)
+        assert np.all(heatmap >= 0.0)
 
 
 class TestImageCaptioner:
