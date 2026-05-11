@@ -43,7 +43,7 @@ Implementasi menggunakan PIL/Pillow + NumPy (tanpa Keras preprocessing):
 - `load_batch(paths, target_size)`: batch loader → output shape `(N, H, W, C)`
 - `extract_features(paths, encoder)`: Keras CNN encoder (frozen) → feature vectors → save `.npy`
 
-### Part 2 — From-Scratch Layers (`scratch_nn/layers/`)
+### Part 2 — From-Scratch Layers (`nn/layers/`)
 Semua layer HARUS support `set_weights(keras_weights)` dan method `forward(x: np.ndarray) → np.ndarray`.
 
 | Layer | Bobot Keras | Operasi |
@@ -101,7 +101,7 @@ Training: teacher forcing
 ### Keras model input shape
 - Caption sequence (prepended with CNN feature): `(seq_len+1, embed_dim)`
 
-### Part 0 — From-Scratch Layers (`scratch_nn/layers/`)
+### Part 0 — From-Scratch Layers (`nn/layers/`)
 
 | Layer | Operasi |
 |---|---|
@@ -166,7 +166,7 @@ Simpan semua bobot model hasil pelatihan.
 
 ```
 src/
-├── scratch_nn/
+├── nn/
 │   ├── activations/        # Softmax, ReLU, Sigmoid (reuse Tubes 1)
 │   ├── losses/             # CrossEntropy (reuse Tubes 1)
 │   ├── initializers/       # Random init (reuse Tubes 1)
@@ -301,7 +301,7 @@ README.md
 
 | Term | Meaning |
 |---|---|
-| `scratch_nn` | Implementasi layer manual dengan NumPy (bukan Keras) |
+| `nn` | Implementasi layer manual dengan NumPy (bukan Keras) |
 | Pre-inject | Image feature diinjeksi ke decoder sebagai x_{-1} (sebelum token `<start>`) |
 | Init-inject | Image feature diinjeksi via Add/Concatenate setelah LSTM output (bonus) |
 | Shared params | Filter konvolusi yang sama digeser ke seluruh area (Conv2D standar) |

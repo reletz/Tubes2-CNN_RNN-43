@@ -8,9 +8,7 @@ class Layer:
             input_size: int,
             output_size: int,
             activation_fn: Activation,
-            init_fn: Initializer,
-            use_rmsnorm: bool = False,
-            rmsnorm_eps: float = 1e-8
+            init_fn: Initializer
             ) -> None:
         self.weights: np.ndarray = init_fn.initialize((input_size, output_size))
         self.biases: np.ndarray = init_fn.initialize((1, output_size))
