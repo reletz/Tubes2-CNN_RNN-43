@@ -93,9 +93,13 @@ class ImageCaptioner:
     def set_output_weights(self, kernel: np.ndarray, bias: np.ndarray) -> None:
         kernel = np.asarray(kernel, dtype=np.float32)
         bias = np.asarray(bias, dtype=np.float32)
-        if kernel.shape != (self.hidden_units, self.vocab_size):
+        if kernel.shape[0] != self.hidden_units:
             raise ValueError(
-                f"Expected output kernel shape ({self.hidden_units}, {self.vocab_size}), got {kernel.shape}"
+                f"Expected output kernel first dim {self.hidden_units}, got {kernel.shape[0]}"
+            )
+        if kernel.shape[1] != self.vocab_size:
+            raise ValueError(
+                f"Expected output kernel second dim {self.vocab_size}, got {kernel.shape[1]}"
             )
         if bias.shape != (self.vocab_size,):
             raise ValueError(f"Expected output bias shape ({self.vocab_size},), got {bias.shape}")
@@ -179,6 +183,100 @@ class ImageCaptioner:
 
             # current_input is the output of the last recurrent layer: (batch, hidden_units)
             logits = current_input @ self.output_kernel + self.output_bias
+            outputs.append(logits)
+
+        return np.stack(outputs, axis=1)
+
+
+class InitInjectCaptioner(ImageCaptioner):
+    """Init-inject image captioning builder.
+
+    In this architecture, image features are merged with the recurrent
+    output (after the sequence is processed) rather than being prepended.
+    Specifically, the image is projected to hidden_units and merged with
+    the RNN/LSTM hidden state at each timestep before the final Dense output.
+    """
+
+    def __init__(
+        self,
+        vocab_size: int,
+        embed_dim: int,
+        hidden_units: int,
+        decoder_kind: DecoderKind = "lstm",
+        num_recurrent_layers: int = 1,
+        merge_mode: Literal["add", "concat"] = "add",
+    ) -> None:
+        super().__init__(vocab_size, embed_dim, hidden_units, decoder_kind, num_recurrent_layers)
+        self.merge_mode = merge_mode
+
+    def set_output_weights(self, kernel: np.ndarray, bias: np.ndarray) -> None:
+        """Override to handle different input dimensions if concatenating."""
+        kernel = np.asarray(kernel, dtype=np.float32)
+        bias = np.asarray(bias, dtype=np.float32)
+        
+        expected_input_dim = self.hidden_units
+        if self.merge_mode == "concat":
+            expected_input_dim = self.hidden_units * 2
+            
+        if kernel.shape[0] != expected_input_dim:
+             raise ValueError(
+                f"Expected output kernel first dim {expected_input_dim}, got {kernel.shape[0]}"
+            )
+        if kernel.shape[1] != self.vocab_size:
+            raise ValueError(
+                f"Expected output kernel second dim {self.vocab_size}, got {kernel.shape[1]}"
+            )
+        if bias.shape != (self.vocab_size,):
+            raise ValueError(f"Expected output bias shape ({self.vocab_size},), got {bias.shape}")
+            
+        self.output_kernel = kernel
+        self.output_bias = bias
+
+    def forward(self, image_features: np.ndarray, token_ids: np.ndarray) -> np.ndarray:
+        """Run init-inject caption decoding.
+
+        Args:
+            image_features: shape (batch, feature_dim)
+            token_ids: shape (batch, seq_len) integer token ids
+
+        Returns:
+            Logits with shape (batch, seq_len, vocab_size)
+        """
+        token_ids = np.asarray(token_ids, dtype=np.int32)
+        if token_ids.ndim != 2:
+            raise ValueError(f"Expected token_ids shape (batch, seq_len), got {token_ids.shape}")
+
+        batch_size = token_ids.shape[0]
+        # Project image to hidden_units to match recurrent output if using 'add'
+        projected_image = self._project_image(image_features)  # (batch, hidden_units)
+        token_embeddings = self.embedding.forward(token_ids)  # (batch, seq_len, embed_dim)
+
+        states = self._initialize_states(batch_size)
+        outputs: list[np.ndarray] = []
+
+        # Process tokens only (no pre-injected image)
+        for t in range(token_embeddings.shape[1]):
+            current_input = token_embeddings[:, t, :]
+            for idx, layer in enumerate(self.recurrent_layers):
+                state = states[idx]
+                if isinstance(layer, SimpleRNNCell):
+                    state.h = layer.forward(current_input, state.h)
+                    current_input = state.h
+                else:
+                    assert state.c is not None
+                    state.h, state.c = layer.forward(current_input, state.h, state.c)
+                    current_input = state.h
+
+            # Merge with image features
+            if self.merge_mode == "add":
+                merged = current_input + projected_image
+            else:  # concat
+                merged = np.concatenate([current_input, projected_image], axis=1)
+
+            if self.output_kernel is None or self.output_bias is None:
+                raise ValueError("Output weights are not set")
+
+            logits = merged @ self.output_kernel + self.output_bias
             outputs.append(logits)
 
         return np.stack(outputs, axis=1)
