@@ -260,10 +260,10 @@ README.md
 - [ ] Notebook 4: Load Keras weights → scratch RNN/LSTM → Greedy Decode → BLEU-4 + waktu
 
 ### Phase 6 — Bonus (High Priority)
-- [ ] **Batch Inference**: refactor semua layer ops untuk support batch dim `(B,...)` via `einsum`/`tensordot`
+- [DONE] **Batch Inference**: refactor semua layer ops untuk support batch dim `(B,...)` via `einsum`/`tensordot`
 - [ ] **Backprop**: implement `backward()` untuk Conv2D, MaxPooling, LSTM cell
-- [ ] **Init-Inject**: arsitektur alternatif — image feature via Add/Concatenate setelah LSTM; bandingkan BLEU-4 vs pre-inject (Keras + scratch)
-- [ ] **Beam Search**: ganti Greedy Decode di Notebook 4 dengan Beam Search (K=3 atau K=5); bandingkan kualitas caption
+- [DONE] **Init-Inject**: arsitektur alternatif — image feature via Add/Concatenate setelah LSTM; bandingkan BLEU-4 vs pre-inject (Keras + scratch)
+- [DONE] **Beam Search**: ganti Greedy Decode di Notebook 4 dengan Beam Search (K=3 atau K=5); bandingkan kualitas caption
 - [ ] **Grad-CAM**: gradients dari last conv layer → heatmap overlay pada gambar asli; + visualisasi intermediate feature maps
 
 ### Phase 7 — Deliverables
