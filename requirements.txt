@@ -9,3 +9,4 @@ tqdm>=4.66.0
 tensorflow>=2.15.0
 pillow>=10.0.0
 nltk>=3.8.1
+pytest

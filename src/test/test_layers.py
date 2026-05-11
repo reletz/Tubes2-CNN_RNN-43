@@ -21,6 +21,8 @@ def _load_module(module_name: str, file_path: str):
 conv_module = _load_module("conv", "src/nn/layers/conv.py")
 pool_module = _load_module("pool", "src/nn/layers/pooling.py")
 flat_module = _load_module("flat", "src/nn/layers/flatten.py")
+emb_module = _load_module("emb", "src/nn/layers/embedding.py")
+recurrent_module = _load_module("recurrent", "src/nn/layers/recurrent.py")
 
 
 class TestConv2D:
@@ -261,6 +263,137 @@ class TestFlatten:
 
         with pytest.raises(ValueError, match="Cannot call backward"):
             fl.backward(np.ones((2, 48)))
+
+
+class TestEmbedding:
+    """Test Embedding layer."""
+
+    def test_forward_shape(self):
+        """Test Embedding forward output shape."""
+        vocab_size = 50
+        embed_dim = 16
+        layer = emb_module.Embedding(vocab_size, embed_dim)
+
+        weights = np.random.randn(vocab_size, embed_dim).astype(np.float32)
+        layer.set_weights(weights)
+
+        x = np.array([[1, 2, 3], [4, 5, 6]], dtype=np.int32)
+        out = layer.forward(x)
+
+        assert out.shape == (2, 3, 16), f"Expected (2,3,16), got {out.shape}"
+
+    def test_forward_values(self):
+        """Test Embedding lookup returns correct rows."""
+        vocab_size = 10
+        embed_dim = 4
+        layer = emb_module.Embedding(vocab_size, embed_dim)
+
+        weights = np.arange(vocab_size * embed_dim, dtype=np.float32).reshape(
+            vocab_size, embed_dim
+        )
+        layer.set_weights(weights)
+
+        x = np.array([[0, 3, 9]], dtype=np.int32)
+        out = layer.forward(x)
+
+        assert np.allclose(out[0, 0], weights[0])
+        assert np.allclose(out[0, 1], weights[3])
+        assert np.allclose(out[0, 2], weights[9])
+
+    def test_invalid_token_raises(self):
+        """Test Embedding raises for out-of-range token IDs."""
+        vocab_size = 10
+        embed_dim = 4
+        layer = emb_module.Embedding(vocab_size, embed_dim)
+
+        weights = np.random.randn(vocab_size, embed_dim).astype(np.float32)
+        layer.set_weights(weights)
+
+        x = np.array([[0, 10]], dtype=np.int32)
+        with pytest.raises(ValueError, match="Token IDs must be in range"):
+            layer.forward(x)
+
+
+class TestRecurrent:
+    """Test recurrent layers."""
+
+    def test_simplernn_forward_shape(self):
+        """Test SimpleRNNCell forward output shape."""
+        units = 5
+        input_dim = 3
+        batch_size = 4
+
+        layer = recurrent_module.SimpleRNNCell(units)
+        kernel = np.random.randn(input_dim, units).astype(np.float32)
+        recurrent_kernel = np.random.randn(units, units).astype(np.float32)
+        bias = np.random.randn(units).astype(np.float32)
+        layer.set_weights(kernel, recurrent_kernel, bias)
+
+        x = np.random.randn(batch_size, input_dim).astype(np.float32)
+        h_prev = layer.get_initial_state(batch_size)
+        out = layer.forward(x, h_prev)
+
+        assert out.shape == (batch_size, units), f"Expected ({batch_size},{units}), got {out.shape}"
+
+    def test_simplernn_initial_state(self):
+        """Test SimpleRNNCell initial state."""
+        layer = recurrent_module.SimpleRNNCell(7)
+        state = layer.get_initial_state(3)
+
+        assert state.shape == (3, 7)
+        assert np.allclose(state, 0.0)
+
+    def test_lstm_forward_shape(self):
+        """Test LSTMCell forward output shapes."""
+        units = 6
+        input_dim = 4
+        batch_size = 2
+
+        layer = recurrent_module.LSTMCell(units)
+        kernel = np.random.randn(input_dim, 4 * units).astype(np.float32)
+        recurrent_kernel = np.random.randn(units, 4 * units).astype(np.float32)
+        bias = np.random.randn(4 * units).astype(np.float32)
+        layer.set_weights(kernel, recurrent_kernel, bias)
+
+        x = np.random.randn(batch_size, input_dim).astype(np.float32)
+        h_prev, c_prev = layer.get_initial_state(batch_size)
+        h_out, c_out = layer.forward(x, h_prev, c_prev)
+
+        assert h_out.shape == (batch_size, units), f"Expected ({batch_size},{units}), got {h_out.shape}"
+        assert c_out.shape == (batch_size, units), f"Expected ({batch_size},{units}), got {c_out.shape}"
+
+    def test_lstm_initial_state(self):
+        """Test LSTMCell initial state."""
+        layer = recurrent_module.LSTMCell(8)
+        h0, c0 = layer.get_initial_state(5)
+
+        assert h0.shape == (5, 8)
+        assert c0.shape == (5, 8)
+        assert np.allclose(h0, 0.0)
+        assert np.allclose(c0, 0.0)
+
+    def test_lstm_multi_step(self):
+        """Test LSTMCell can process multiple timesteps."""
+        units = 3
+        input_dim = 4
+        batch_size = 2
+
+        layer = recurrent_module.LSTMCell(units)
+        kernel = np.random.randn(input_dim, 4 * units).astype(np.float32)
+        recurrent_kernel = np.random.randn(units, 4 * units).astype(np.float32)
+        bias = np.random.randn(4 * units).astype(np.float32)
+        layer.set_weights(kernel, recurrent_kernel, bias)
+
+        x = np.random.randn(batch_size, input_dim).astype(np.float32)
+        h_prev, c_prev = layer.get_initial_state(batch_size)
+
+        h1, c1 = layer.forward(x, h_prev, c_prev)
+        h2, c2 = layer.forward(x, h1, c1)
+
+        assert h1.shape == (batch_size, units)
+        assert c1.shape == (batch_size, units)
+        assert h2.shape == (batch_size, units)
+        assert c2.shape == (batch_size, units)
 
 
 class TestDataflow:
