@@ -1,5 +1,24 @@
-from ..activations.Activation import Activation
-from ..initializers.Initializer import Initializer
+# Normal imports when the package is available
+try:
+    from ..activations.Activation import Activation
+    from ..initializers.Initializer import Initializer
+except ImportError:  # pragma: no cover – fallback for direct file loading in tests
+    import importlib.util
+    from pathlib import Path
+
+    def _load_module(module_name: str, relative_path: str):
+        module_path = Path(__file__).resolve().parents[1] / relative_path
+        spec = importlib.util.spec_from_file_location(module_name, str(module_path))
+        mod = importlib.util.module_from_spec(spec)
+        assert spec is not None and spec.loader is not None
+        spec.loader.exec_module(mod)
+        return mod
+
+    _activation_mod = _load_module("activation_fallback", "activations/Activation.py")
+    _initializer_mod = _load_module("initializer_fallback", "initializers/Initializer.py")
+    Activation = _activation_mod.Activation
+    Initializer = _initializer_mod.Initializer
+
 import numpy as np
 
 class Layer:
@@ -22,10 +41,6 @@ class Layer:
         self.input_cache = X
         z = X @ self.weights + self.biases
         self.z_cache = z
-
-        if self.rmsnorm is not None:
-            z = self.rmsnorm.forward(z)
-
         return self.activation.forward(z)
 
     def backward(self, grad_output: np.ndarray) -> np.ndarray:
@@ -35,9 +50,6 @@ class Layer:
         batch_size = self.input_cache.shape[0]
 
         dz = self.activation.backward(grad_output)
-
-        if self.rmsnorm is not None:
-            dz = self.rmsnorm.backward(dz)
 
         self.weight_gradients = self.input_cache.T @ dz / batch_size
         self.bias_gradients = np.mean(dz, axis=0, keepdims=True)

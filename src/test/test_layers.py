@@ -23,6 +23,7 @@ pool_module = _load_module("pool", "src/nn/layers/pooling.py")
 flat_module = _load_module("flat", "src/nn/layers/flatten.py")
 emb_module = _load_module("emb", "src/nn/layers/embedding.py")
 recurrent_module = _load_module("recurrent", "src/nn/layers/recurrent.py")
+metrics_module = _load_module("metrics", "src/utils/metrics.py")
 
 
 class TestConv2D:
@@ -516,6 +517,52 @@ class TestImageCaptioner:
 
         with pytest.raises(ValueError, match="Output weights are not set"):
             cap.forward(image_features, token_ids)
+
+
+class TestMetrics:
+    """Test metrics utilities."""
+
+    def test_compute_bleu4(self):
+        references = [
+            [["a", "cat", "sits"], ["cat", "on", "mat"]],
+            [["a", "dog", "runs"], ["dog", "runs"]],
+        ]
+        hypotheses = [["a", "cat", "sits"], ["dog", "runs"]]
+
+        score = metrics_module.compute_bleu4(references, hypotheses)
+
+        assert 0.0 <= score <= 1.0
+        assert score > 0.0
+
+    def test_compute_meteor(self):
+        references = [
+            [["a", "cat", "sits"], ["cat", "on", "mat"]],
+            [["a", "dog", "runs"], ["dog", "runs"]],
+        ]
+        hypotheses = [["a", "cat", "sits"], ["dog", "runs"]]
+
+        score = metrics_module.compute_meteor(references, hypotheses)
+
+        assert 0.0 <= score <= 1.0
+        assert score > 0.0
+
+    def test_compute_macro_f1(self):
+        y_true = [0, 1, 1, 2]
+        y_pred = [0, 1, 0, 2]
+
+        score = metrics_module.compute_macro_f1(y_true, y_pred)
+
+        assert np.isclose(score, 0.7777777777777777)
+
+    def test_caption_length_stats(self):
+        captions = ["a cat sits", ["dog", "runs"], []]
+
+        stats = metrics_module.caption_length_stats(captions)
+
+        assert stats["count"] == 3.0
+        assert stats["min"] == 0.0
+        assert stats["max"] == 3.0
+        assert np.isclose(stats["mean"], 1.6666666)
 
 
 if __name__ == "__main__":

@@ -232,24 +232,24 @@ README.md
 ## TASK CHECKLIST
 
 ### Phase 1 — Setup & Utilities
-- [ ] venv Python 3.11 + `requirements.txt`
-- [ ] `image_utils.py`: `load_image`, `load_batch` (PIL, resize, normalize [0,1])
-- [ ] `image_utils.py`: `extract_features` → InceptionV3/VGG16 → `.npy`
-- [ ] `text_utils.py`: lowercase, punctuation cleaner, tokenizer, vocab builder, sequence padder
+- [DONE] venv Python 3.11 + `requirements.txt`
+- [DONE] `image_utils.py`: `load_image`, `load_batch` (PIL, resize, normalize [0,1])
+- [DONE] `image_utils.py`: `extract_features` → InceptionV3/VGG16 → `.npy`
+- [DONE] `text_utils.py`: lowercase, punctuation cleaner, tokenizer, vocab builder, sequence padder
 
 ### Phase 2 — From-Scratch Core (NumPy only)
-- [ ] `dense.py`: tambah `set_weights()` (dari Tubes 1)
-- [ ] `flatten.py`: NumPy reshape row-major
-- [ ] `conv.py`: `Conv2D` (manual cross-correlation)
-- [ ] `conv.py`: `LocallyConnected2D` (no shared params)
-- [ ] `pooling.py`: `MaxPool2D`, `AvgPool2D`, `GlobalMaxPooling2D`, `GlobalAvgPooling2D`
-- [ ] `embedding.py`: word ID → continuous vector
-- [ ] `recurrent.py`: `SimpleRNN` cell (tanh)
-- [ ] `recurrent.py`: `LSTM` cell (forget/input/output gates + cell state)
+- [DONE] `dense.py`: tambah `set_weights()` (dari Tubes 1)
+- [DONE] `flatten.py`: NumPy reshape row-major
+- [DONE] `conv.py`: `Conv2D` (manual cross-correlation)
+- [DONE] `conv.py`: `LocallyConnected2D` (no shared params)
+- [DONE] `pooling.py`: `MaxPool2D`, `AvgPool2D`, `GlobalMaxPooling2D`, `GlobalAvgPooling2D`
+- [DONE] `embedding.py`: word ID → continuous vector
+- [DONE] `recurrent.py`: `SimpleRNN` cell (tanh)
+- [DONE] `recurrent.py`: `LSTM` cell (forget/input/output gates + cell state)
 
 ### Phase 3 — Model Builders
 - [ ] `cnn_model.py`: `CNNClassifier` builder class
-- [ ] `caption_model.py`: `ImageCaptioner` encoder-decoder pre-inject builder class
+- [DONE] `caption_model.py`: `ImageCaptioner` encoder-decoder pre-inject builder class
 
 ### Phase 4 — Keras Training
 - [ ] Notebook 1: CNN training, semua variasi hyperparameter (3+3+3+2), save weights + macro F1
