@@ -38,7 +38,7 @@ class _LayerState:
 class ImageCaptioner:
     """Pre-inject image captioning builder.
 
-    The image feature vector is projected to `embed_dim` and prepended to the
+    The image feature vector is projected to embed_dim and prepended to the
     token embedding sequence before recurrent processing.
 
     This class is designed for inference/smoke testing and Keras weight loading.
