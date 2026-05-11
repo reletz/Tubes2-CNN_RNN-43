@@ -46,8 +46,6 @@ class ImageCaptioner:
 
     The image feature vector is projected to embed_dim and prepended to the
     token embedding sequence before recurrent processing.
-
-    This class is designed for inference/smoke testing and Keras weight loading.
     """
 
     def __init__(
@@ -100,13 +98,9 @@ class ImageCaptioner:
         kernel = np.asarray(kernel, dtype=np.float32)
         bias = np.asarray(bias, dtype=np.float32)
         if kernel.shape[0] != self.hidden_units:
-            raise ValueError(
-                f"Expected output kernel first dim {self.hidden_units}, got {kernel.shape[0]}"
-            )
+            raise ValueError(f"Expected output kernel first dim {self.hidden_units}, got {kernel.shape[0]}")
         if kernel.shape[1] != self.vocab_size:
-            raise ValueError(
-                f"Expected output kernel second dim {self.vocab_size}, got {kernel.shape[1]}"
-            )
+            raise ValueError(f"Expected output kernel second dim {self.vocab_size}, got {kernel.shape[1]}")
         if bias.shape != (self.vocab_size,):
             raise ValueError(f"Expected output bias shape ({self.vocab_size},), got {bias.shape}")
         self.output_kernel = kernel
@@ -124,17 +118,7 @@ class ImageCaptioner:
     def _project_image(self, image_features: np.ndarray) -> np.ndarray:
         if self.image_projection_kernel is None or self.image_projection_bias is None:
             raise ValueError("Image projection weights are not set")
-
         image_features = np.asarray(image_features, dtype=np.float32)
-        if image_features.ndim != 2:
-            raise ValueError(f"Expected image_features shape (batch, feature_dim), got {image_features.shape}")
-
-        if image_features.shape[1] != self.image_projection_kernel.shape[0]:
-            raise ValueError(
-                "Image feature dimension mismatch: "
-                f"expected {self.image_projection_kernel.shape[0]}, got {image_features.shape[1]}"
-            )
-
         return image_features @ self.image_projection_kernel + self.image_projection_bias
 
     def _initialize_states(self, batch_size: int) -> list[_LayerState]:
@@ -148,50 +132,80 @@ class ImageCaptioner:
         return states
 
     def forward(self, image_features: np.ndarray, token_ids: np.ndarray) -> np.ndarray:
-        """Run pre-inject caption decoding.
-
-        Args:
-            image_features: shape (batch, feature_dim)
-            token_ids: shape (batch, seq_len) integer token ids
-
-        Returns:
-            Logits with shape (batch, seq_len + 1, vocab_size)
-        """
-        token_ids = np.asarray(token_ids, dtype=np.int32)
-        if token_ids.ndim != 2:
-            raise ValueError(f"Expected token_ids shape (batch, seq_len), got {token_ids.shape}")
-
+        """Standard forward pass (logits) for training/evaluation."""
         batch_size = token_ids.shape[0]
-        projected_image = self._project_image(image_features)  # (batch, embed_dim)
-        token_embeddings = self.embedding.forward(token_ids)  # (batch, seq_len, embed_dim)
-
-        # Pre-inject sequence: x_-1 = image projection, followed by token embeddings.
-        # sequence is a list of (batch, embed_dim) arrays.
+        projected_image = self._project_image(image_features)
+        token_embeddings = self.embedding.forward(token_ids)
         sequence = [projected_image] + [token_embeddings[:, t, :] for t in range(token_embeddings.shape[1])]
-
         states = self._initialize_states(batch_size)
-        outputs: list[np.ndarray] = []
-
+        outputs = []
         for x_t in sequence:
-            current_input = x_t
+            curr = x_t
             for idx, layer in enumerate(self.recurrent_layers):
                 state = states[idx]
                 if isinstance(layer, SimpleRNNCell):
-                    state.h = layer.forward(current_input, state.h)
-                    current_input = state.h
+                    state.h = layer.forward(curr, state.h)
                 else:
-                    assert state.c is not None
-                    state.h, state.c = layer.forward(current_input, state.h, state.c)
-                    current_input = state.h
-
-            if self.output_kernel is None or self.output_bias is None:
-                raise ValueError("Output weights are not set")
-
-            # current_input is the output of the last recurrent layer: (batch, hidden_units)
-            logits = current_input @ self.output_kernel + self.output_bias
-            outputs.append(logits)
-
+                    state.h, state.c = layer.forward(curr, state.h, state.c)
+                curr = state.h
+            outputs.append(curr @ self.output_kernel + self.output_bias)
         return np.stack(outputs, axis=1)
+
+    def generate_captions(
+        self,
+        image_features: np.ndarray,
+        start_token: int,
+        end_token: int,
+        method: Literal["greedy", "beam"] = "greedy",
+        beam_width: int = 3,
+        max_len: int = 20,
+    ) -> list[list[int]]:
+        """Public batch API for caption generation."""
+        if method == "greedy":
+            return self.greedy_decode(image_features, start_token, end_token, max_len)
+        return self.beam_search_decode(image_features, start_token, end_token, beam_width, max_len)
+
+    def greedy_decode(
+        self,
+        image_features: np.ndarray,
+        start_token: int,
+        end_token: int,
+        max_len: int = 20,
+    ) -> list[list[int]]:
+        """Vectorized greedy decoding for batches."""
+        batch_size = image_features.shape[0]
+        curr = self._project_image(image_features)
+        states = self._initialize_states(batch_size)
+        
+        # Step -1: Image
+        for idx, layer in enumerate(self.recurrent_layers):
+            state = states[idx]
+            if isinstance(layer, SimpleRNNCell): state.h = layer.forward(curr, state.h)
+            else: state.h, state.c = layer.forward(curr, state.h, state.c)
+            curr = state.h
+            
+        last_tokens = np.full((batch_size,), start_token, dtype=np.int32)
+        results = [[] for _ in range(batch_size)]
+        finished = np.zeros(batch_size, dtype=bool)
+
+        for _ in range(max_len):
+            if np.all(finished): break
+            curr = self.embedding.forward(last_tokens[:, None])[:, 0, :]
+            for idx, layer in enumerate(self.recurrent_layers):
+                state = states[idx]
+                if isinstance(layer, SimpleRNNCell): state.h = layer.forward(curr, state.h)
+                else: state.h, state.c = layer.forward(curr, state.h, state.c)
+                curr = state.h
+            
+            logits = curr @ self.output_kernel + self.output_bias
+            next_tokens = np.argmax(logits, axis=1)
+            for i in range(batch_size):
+                if not finished[i]:
+                    token = int(next_tokens[i])
+                    if token == end_token: finished[i] = True
+                    else: results[i].append(token)
+            last_tokens = next_tokens
+        return results
 
     def beam_search_decode(
         self,
@@ -200,262 +214,131 @@ class ImageCaptioner:
         end_token: int,
         beam_width: int = 3,
         max_len: int = 20,
-    ) -> list[int]:
-        """Beam search decoding for a single image.
+    ) -> list[list[int]]:
+        """Batch beam search (internally loops over single images)."""
+        return [self._beam_search_single(image_features[i:i+1], start_token, end_token, beam_width, max_len) 
+                for i in range(image_features.shape[0])]
 
-        Args:
-            image_features: (1, feature_dim)
-            start_token: ID of <start>
-            end_token: ID of <end>
-            beam_width: Number of beams
-            max_len: Maximum caption length
-
-        Returns:
-            Token ID sequence (excluding start_token)
-        """
-        if image_features.shape[0] != 1:
-            raise ValueError("beam_search_decode currently supports only single-image batch")
-
-        # Initial step: project image and run through layers
-        projected_image = self._project_image(image_features)
+    def _beam_search_single(self, image_features, start_token, end_token, beam_width, max_len):
+        curr = self._project_image(image_features)
         states = self._initialize_states(1)
-        
-        current_input = projected_image
         for idx, layer in enumerate(self.recurrent_layers):
             state = states[idx]
-            if isinstance(layer, SimpleRNNCell):
-                state.h = layer.forward(current_input, state.h)
-                current_input = state.h
-            else:
-                assert state.c is not None
-                state.h, state.c = layer.forward(current_input, state.h, state.c)
-                current_input = state.h
+            if isinstance(layer, SimpleRNNCell): state.h = layer.forward(curr, state.h)
+            else: state.h, state.c = layer.forward(curr, state.h, state.c)
+            curr = state.h
 
-        # Beam structure: (score, sequence, states)
-        # Sequence excludes <start> for now.
         beams = [(0.0, [], [s.copy() for s in states])]
         completed = []
-
         for _ in range(max_len):
             new_beams = []
             for score, seq, b_states in beams:
-                # Last token ID
                 last_token = seq[-1] if seq else start_token
-                
-                # Get embedding
-                x_t = self.embedding.forward(np.array([[last_token]], dtype=np.int32))
-                x_t = x_t[:, 0, :] # (1, embed_dim)
-
-                # Step forward
-                current_states = [s.copy() for s in b_states]
-                layer_input = x_t
+                curr = self.embedding.forward(np.array([[last_token]]))[:, 0, :]
+                c_states = [s.copy() for s in b_states]
                 for idx, layer in enumerate(self.recurrent_layers):
-                    state = current_states[idx]
-                    if isinstance(layer, SimpleRNNCell):
-                        state.h = layer.forward(layer_input, state.h)
-                        layer_input = state.h
-                    else:
-                        assert state.c is not None
-                        state.h, state.c = layer.forward(layer_input, state.h, state.c)
-                        layer_input = state.h
-
-                # Get logits and log-probs
-                if self.output_kernel is None or self.output_bias is None:
-                    raise ValueError("Output weights are not set")
+                    state = c_states[idx]
+                    if isinstance(layer, SimpleRNNCell): state.h = layer.forward(curr, state.h)
+                    else: state.h, state.c = layer.forward(curr, state.h, state.c)
+                    curr = state.h
                 
-                logits = layer_input @ self.output_kernel + self.output_bias
-                # log_softmax
-                max_logit = np.max(logits, axis=1, keepdims=True)
-                log_probs = logits - max_logit - np.log(np.sum(np.exp(logits - max_logit), axis=1, keepdims=True))
-                log_probs = log_probs[0] # (vocab_size,)
-
-                # Get top K
-                top_indices = np.argsort(log_probs)[-beam_width:]
-                for idx in top_indices:
-                    new_score = score + log_probs[idx]
-                    new_seq = seq + [int(idx)]
-                    if idx == end_token:
-                        completed.append((new_score, new_seq))
-                    else:
-                        new_beams.append((new_score, new_seq, [s.copy() for s in current_states]))
-
-            # Keep top K new beams
+                logits = curr @ self.output_kernel + self.output_bias
+                log_probs = logits[0] - np.max(logits) - np.log(np.sum(np.exp(logits - np.max(logits))))
+                top_idx = np.argsort(log_probs)[-beam_width:]
+                for idx in top_idx:
+                    n_score, n_seq = score + log_probs[idx], seq + [int(idx)]
+                    if idx == end_token: completed.append((n_score, n_seq))
+                    else: new_beams.append((n_score, n_seq, [s.copy() for s in c_states]))
             new_beams.sort(key=lambda x: x[0], reverse=True)
             beams = new_beams[:beam_width]
-
-            if not beams:
-                break
-
-        # Combine and pick best
-        all_results = completed + [(s, q) for s, q, _ in beams]
-        if not all_results:
-            return []
+            if not beams: break
         
-        all_results.sort(key=lambda x: x[0], reverse=True)
-        return all_results[0][1]
+        all_res = completed + [(s, q) for s, q, _ in beams]
+        if not all_res: return []
+        all_res.sort(key=lambda x: x[0], reverse=True)
+        return all_res[0][1]
 
 
 class InitInjectCaptioner(ImageCaptioner):
-    """Init-inject image captioning builder.
-
-    In this architecture, image features are merged with the recurrent
-    output (after the sequence is processed) rather than being prepended.
-    Specifically, the image is projected to hidden_units and merged with
-    the RNN/LSTM hidden state at each timestep before the final Dense output.
-    """
-
-    def __init__(
-        self,
-        vocab_size: int,
-        embed_dim: int,
-        hidden_units: int,
-        decoder_kind: DecoderKind = "lstm",
-        num_recurrent_layers: int = 1,
-        merge_mode: Literal["add", "concat"] = "add",
-    ) -> None:
-        super().__init__(vocab_size, embed_dim, hidden_units, decoder_kind, num_recurrent_layers)
+    """Alternative init-inject architecture."""
+    def __init__(self, *args, merge_mode: Literal["add", "concat"] = "add", **kwargs):
+        super().__init__(*args, **kwargs)
         self.merge_mode = merge_mode
 
-    def set_output_weights(self, kernel: np.ndarray, bias: np.ndarray) -> None:
-        """Override to handle different input dimensions if concatenating."""
-        kernel = np.asarray(kernel, dtype=np.float32)
-        bias = np.asarray(bias, dtype=np.float32)
-        
-        expected_input_dim = self.hidden_units
-        if self.merge_mode == "concat":
-            expected_input_dim = self.hidden_units * 2
-            
-        if kernel.shape[0] != expected_input_dim:
-             raise ValueError(
-                f"Expected output kernel first dim {expected_input_dim}, got {kernel.shape[0]}"
-            )
-        if kernel.shape[1] != self.vocab_size:
-            raise ValueError(
-                f"Expected output kernel second dim {self.vocab_size}, got {kernel.shape[1]}"
-            )
-        if bias.shape != (self.vocab_size,):
-            raise ValueError(f"Expected output bias shape ({self.vocab_size},), got {bias.shape}")
-            
-        self.output_kernel = kernel
-        self.output_bias = bias
+    def set_output_weights(self, kernel, bias):
+        expected = self.hidden_units * (2 if self.merge_mode == "concat" else 1)
+        if kernel.shape[0] != expected: raise ValueError(f"Expected {expected}, got {kernel.shape[0]}")
+        self.output_kernel, self.output_bias = kernel, bias
 
-    def forward(self, image_features: np.ndarray, token_ids: np.ndarray) -> np.ndarray:
-        """Run init-inject caption decoding.
-
-        Args:
-            image_features: shape (batch, feature_dim)
-            token_ids: shape (batch, seq_len) integer token ids
-
-        Returns:
-            Logits with shape (batch, seq_len, vocab_size)
-        """
-        token_ids = np.asarray(token_ids, dtype=np.int32)
-        if token_ids.ndim != 2:
-            raise ValueError(f"Expected token_ids shape (batch, seq_len), got {token_ids.shape}")
-
+    def forward(self, image_features, token_ids):
         batch_size = token_ids.shape[0]
-        # Project image to hidden_units to match recurrent output if using 'add'
-        projected_image = self._project_image(image_features)  # (batch, hidden_units)
-        token_embeddings = self.embedding.forward(token_ids)  # (batch, seq_len, embed_dim)
-
+        proj_img = self._project_image(image_features)
+        token_embs = self.embedding.forward(token_ids)
         states = self._initialize_states(batch_size)
-        outputs: list[np.ndarray] = []
-
-        # Process tokens only (no pre-injected image)
-        for t in range(token_embeddings.shape[1]):
-            current_input = token_embeddings[:, t, :]
+        outputs = []
+        for t in range(token_embs.shape[1]):
+            curr = token_embs[:, t, :]
             for idx, layer in enumerate(self.recurrent_layers):
                 state = states[idx]
-                if isinstance(layer, SimpleRNNCell):
-                    state.h = layer.forward(current_input, state.h)
-                    current_input = state.h
-                else:
-                    assert state.c is not None
-                    state.h, state.c = layer.forward(current_input, state.h, state.c)
-                    current_input = state.h
-
-            # Merge with image features
-            if self.merge_mode == "add":
-                merged = current_input + projected_image
-            else:  # concat
-                merged = np.concatenate([current_input, projected_image], axis=1)
-
-            if self.output_kernel is None or self.output_bias is None:
-                raise ValueError("Output weights are not set")
-
-            logits = merged @ self.output_kernel + self.output_bias
-            outputs.append(logits)
-
+                if isinstance(layer, SimpleRNNCell): state.h = layer.forward(curr, state.h)
+                else: state.h, state.c = layer.forward(curr, state.h, state.c)
+                curr = state.h
+            merged = (curr + proj_img) if self.merge_mode == "add" else np.concatenate([curr, proj_img], axis=1)
+            outputs.append(merged @ self.output_kernel + self.output_bias)
         return np.stack(outputs, axis=1)
 
-    def beam_search_decode(
-        self,
-        image_features: np.ndarray,
-        start_token: int,
-        end_token: int,
-        beam_width: int = 3,
-        max_len: int = 20,
-    ) -> list[int]:
-        """Beam search decoding for a single image (Init-Inject)."""
-        if image_features.shape[0] != 1:
-            raise ValueError("beam_search_decode currently supports only single-image batch")
+    def greedy_decode(self, image_features, start_token, end_token, max_len=20):
+        batch_size = image_features.shape[0]
+        proj_img = self._project_image(image_features)
+        states = self._initialize_states(batch_size)
+        last_tokens = np.full((batch_size,), start_token, dtype=np.int32)
+        results, finished = [[] for _ in range(batch_size)], np.zeros(batch_size, dtype=bool)
+        for _ in range(max_len):
+            if np.all(finished): break
+            curr = self.embedding.forward(last_tokens[:, None])[:, 0, :]
+            for idx, layer in enumerate(self.recurrent_layers):
+                state = states[idx]
+                if isinstance(layer, SimpleRNNCell): state.h = layer.forward(curr, state.h)
+                else: state.h, state.c = layer.forward(curr, state.h, state.c)
+                curr = state.h
+            merged = (curr + proj_img) if self.merge_mode == "add" else np.concatenate([curr, proj_img], axis=1)
+            logits = merged @ self.output_kernel + self.output_bias
+            next_tokens = np.argmax(logits, axis=1)
+            for i in range(batch_size):
+                if not finished[i]:
+                    token = int(next_tokens[i])
+                    if token == end_token: finished[i] = True
+                    else: results[i].append(token)
+            last_tokens = next_tokens
+        return results
 
-        projected_image = self._project_image(image_features)
+    def _beam_search_single(self, image_features, start_token, end_token, beam_width, max_len):
+        proj_img = self._project_image(image_features)
         states = self._initialize_states(1)
-        
-        beams = [(0.0, [], [s.copy() for s in states])]
-        completed = []
-
+        beams, completed = [(0.0, [], [s.copy() for s in states])], []
         for _ in range(max_len):
             new_beams = []
             for score, seq, b_states in beams:
                 last_token = seq[-1] if seq else start_token
-                
-                x_t = self.embedding.forward(np.array([[last_token]], dtype=np.int32))
-                x_t = x_t[:, 0, :]
-
-                current_states = [s.copy() for s in b_states]
-                layer_input = x_t
+                curr = self.embedding.forward(np.array([[last_token]]))[:, 0, :]
+                c_states = [s.copy() for s in b_states]
                 for idx, layer in enumerate(self.recurrent_layers):
-                    state = current_states[idx]
-                    if isinstance(layer, SimpleRNNCell):
-                        state.h = layer.forward(layer_input, state.h)
-                        layer_input = state.h
-                    else:
-                        assert state.c is not None
-                        state.h, state.c = layer.forward(layer_input, state.h, state.c)
-                        layer_input = state.h
-
-                # Merge with image features
-                if self.merge_mode == "add":
-                    merged = layer_input + projected_image
-                else:
-                    merged = np.concatenate([layer_input, projected_image], axis=1)
-
-                if self.output_kernel is None or self.output_bias is None:
-                    raise ValueError("Output weights are not set")
-                
+                    state = c_states[idx]
+                    if isinstance(layer, SimpleRNNCell): state.h = layer.forward(curr, state.h)
+                    else: state.h, state.c = layer.forward(curr, state.h, state.c)
+                    curr = state.h
+                merged = (curr + proj_img) if self.merge_mode == "add" else np.concatenate([curr, proj_img], axis=1)
                 logits = merged @ self.output_kernel + self.output_bias
-                max_logit = np.max(logits, axis=1, keepdims=True)
-                log_probs = logits - max_logit - np.log(np.sum(np.exp(logits - max_logit), axis=1, keepdims=True))
-                log_probs = log_probs[0]
-
-                top_indices = np.argsort(log_probs)[-beam_width:]
-                for idx in top_indices:
-                    new_score = score + log_probs[idx]
-                    new_seq = seq + [int(idx)]
-                    if idx == end_token:
-                        completed.append((new_score, new_seq))
-                    else:
-                        new_beams.append((new_score, new_seq, [s.copy() for s in current_states]))
-
+                log_probs = logits[0] - np.max(logits) - np.log(np.sum(np.exp(logits - np.max(logits))))
+                top_idx = np.argsort(log_probs)[-beam_width:]
+                for idx in top_idx:
+                    n_score, n_seq = score + log_probs[idx], seq + [int(idx)]
+                    if idx == end_token: completed.append((n_score, n_seq))
+                    else: new_beams.append((n_score, n_seq, [s.copy() for s in c_states]))
             new_beams.sort(key=lambda x: x[0], reverse=True)
             beams = new_beams[:beam_width]
-            if not beams:
-                break
-
-        all_results = completed + [(s, q) for s, q, _ in beams]
-        if not all_results:
-            return []
-        all_results.sort(key=lambda x: x[0], reverse=True)
-        return all_results[0][1]
+            if not beams: break
+        all_res = completed + [(s, q) for s, q, _ in beams]
+        if not all_res: return []
+        all_res.sort(key=lambda x: x[0], reverse=True)
+        return all_res[0][1]
