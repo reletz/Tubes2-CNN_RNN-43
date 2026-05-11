@@ -140,6 +140,7 @@ class CNNClassifier:
 		self.pool_layers: list[Any] = []
 		self.head_layer: Any
 		self.output_layer: Any
+		self.intermediate_activations: list[np.ndarray] = []
 
 		self._build_layers()
 
@@ -228,8 +229,10 @@ class CNNClassifier:
 			raise ValueError(f"Expected input shape (N,H,W,C) or (H,W,C), got {x.shape}")
 
 		out = x
+		self.intermediate_activations = []
 		for conv_layer, pool_layer in zip(self.conv_layers, self.pool_layers):
 			out = conv_layer.forward(out)
+			self.intermediate_activations.append(out)
 			if pool_layer is not None:
 				out = pool_layer.forward(out)
 
