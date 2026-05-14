@@ -41,111 +41,121 @@
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.2.1}Forward Propagation CNN}{5}{subsection.2.2.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{Conv2D (Shared Parameters)}{5}{section*.12}\protected@file@percent }
 \@writefile{toc}{\contentsline {paragraph}{Step-by-step alur CNN (inference).}{5}{section*.13}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2.1}{\ignorespaces Alur forward propagation CNN dari konvolusi hingga softmax}}{6}{figure.caption.14}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.2}Ringkasan Encoder-Decoder}{6}{subsection.2.2.2}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2.2}{\ignorespaces Ringkasan gabungan encoder-decoder untuk CNN + RNN/LSTM image captioning}}{6}{figure.caption.15}\protected@file@percent }
-\newlabel{fig:encoder-decoder-summary}{{2.2}{6}{Ringkasan gabungan encoder-decoder untuk CNN + RNN/LSTM image captioning}{figure.caption.15}{}}
-\newlabel{fig:encoder-decoder-summary@cref}{{[figure][2][2]2.2}{[1][5][]6}{}{}{}}
-\newlabel{fig:cnn-forward-flow}{{2.2.2}{6}{Ringkasan Encoder-Decoder}{figure.caption.15}{}}
-\newlabel{fig:cnn-forward-flow@cref}{{[subsection][2][2,2]2.2.2}{[1][5][]6}{}{}{}}
-\@writefile{toc}{\contentsline {subsubsection}{LocallyConnected2D (Non-Shared Parameters)}{6}{section*.16}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Step-by-step alur LocallyConnected2D.}{6}{section*.17}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2.3}{\ignorespaces Ilustrasi LocallyConnected2D tanpa parameter sharing}}{6}{figure.caption.18}\protected@file@percent }
-\newlabel{fig:locally-connected-diagram}{{2.3}{6}{Ilustrasi LocallyConnected2D tanpa parameter sharing}{figure.caption.18}{}}
-\newlabel{fig:locally-connected-diagram@cref}{{[figure][3][2]2.3}{[1][6][]6}{}{}{}}
-\@writefile{toc}{\contentsline {subsubsection}{Pooling dan Head}{6}{section*.19}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{Dense + Softmax}{7}{section*.20}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.3}Forward Propagation RNN}{7}{subsection.2.2.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Step-by-step alur encoder CNN $\rightarrow $ decoder RNN $\rightarrow $ softmax.}{7}{section*.21}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2.4}{\ignorespaces Alur forward propagation captioning dengan decoder RNN (dari CNN encoder hingga softmax)}}{7}{figure.caption.22}\protected@file@percent }
-\newlabel{fig:rnn-forward-flow}{{2.4}{7}{Alur forward propagation captioning dengan decoder RNN (dari CNN encoder hingga softmax)}{figure.caption.22}{}}
-\newlabel{fig:rnn-forward-flow@cref}{{[figure][4][2]2.4}{[1][7][]7}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.4}Forward Propagation LSTM}{7}{subsection.2.2.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {paragraph}{Step-by-step alur LSTM decoder.}{8}{section*.23}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2.5}{\ignorespaces Alur forward propagation captioning dengan decoder LSTM (dari CNN encoder hingga softmax)}}{8}{figure.caption.24}\protected@file@percent }
-\newlabel{fig:lstm-forward-flow}{{2.5}{8}{Alur forward propagation captioning dengan decoder LSTM (dari CNN encoder hingga softmax)}{figure.caption.24}{}}
-\newlabel{fig:lstm-forward-flow@cref}{{[figure][5][2]2.5}{[1][8][]8}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.5}Diagram Encoder-Decoder}{8}{subsection.2.2.5}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {2.6}{\ignorespaces Diagram encoder-decoder untuk image captioning dengan skema pre-inject}}{8}{figure.caption.25}\protected@file@percent }
-\newlabel{fig:encoder-decoder-diagram}{{2.6}{8}{Diagram encoder-decoder untuk image captioning dengan skema pre-inject}{figure.caption.25}{}}
-\newlabel{fig:encoder-decoder-diagram@cref}{{[figure][6][2]2.6}{[1][8][]8}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2.1}{\ignorespaces Alur forward propagation CNN dari konvolusi hingga softmax}}{5}{figure.caption.14}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{LocallyConnected2D (Non-Shared Parameters)}{5}{section*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Step-by-step alur LocallyConnected2D.}{5}{section*.16}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2.2}{\ignorespaces Ilustrasi LocallyConnected2D tanpa parameter sharing}}{6}{figure.caption.17}\protected@file@percent }
+\newlabel{fig:locally-connected-diagram}{{2.2}{6}{Ilustrasi LocallyConnected2D tanpa parameter sharing}{figure.caption.17}{}}
+\newlabel{fig:locally-connected-diagram@cref}{{[figure][2][2]2.2}{[1][5][]6}{}{}{}}
+\@writefile{toc}{\contentsline {subsubsection}{Pooling dan Head}{6}{section*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{Dense + Softmax}{6}{section*.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.2}Forward Propagation RNN}{6}{subsection.2.2.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Step-by-step alur encoder CNN $\rightarrow $ decoder RNN $\rightarrow $ softmax.}{6}{section*.20}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2.3}{\ignorespaces Alur forward propagation captioning dengan decoder RNN (dari CNN encoder hingga softmax)}}{7}{figure.caption.21}\protected@file@percent }
+\newlabel{fig:rnn-forward-flow}{{2.3}{7}{Alur forward propagation captioning dengan decoder RNN (dari CNN encoder hingga softmax)}{figure.caption.21}{}}
+\newlabel{fig:rnn-forward-flow@cref}{{[figure][3][2]2.3}{[1][6][]7}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.3}Forward Propagation LSTM}{7}{subsection.2.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Step-by-step alur LSTM decoder.}{7}{section*.22}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2.4}{\ignorespaces Alur forward propagation captioning dengan decoder LSTM (dari CNN encoder hingga softmax)}}{7}{figure.caption.23}\protected@file@percent }
+\newlabel{fig:lstm-forward-flow}{{2.4}{7}{Alur forward propagation captioning dengan decoder LSTM (dari CNN encoder hingga softmax)}{figure.caption.23}{}}
+\newlabel{fig:lstm-forward-flow@cref}{{[figure][4][2]2.4}{[1][7][]7}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2.4}Diagram Encoder-Decoder}{7}{subsection.2.2.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2.5}{\ignorespaces Diagram encoder-decoder untuk image captioning dengan skema pre-inject}}{7}{figure.caption.24}\protected@file@percent }
+\newlabel{fig:encoder-decoder-diagram}{{2.5}{7}{Diagram encoder-decoder untuk image captioning dengan skema pre-inject}{figure.caption.24}{}}
+\newlabel{fig:encoder-decoder-diagram@cref}{{[figure][5][2]2.5}{[1][7][]7}{}{}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {2.3}Implementasi Bonus}{8}{section.2.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.3.1}Batch Inference}{8}{subsection.2.3.1}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.3.2}Backward Propagation}{8}{subsection.2.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.3}Init-Inject Captioning}{9}{subsection.2.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3.3}Init-Inject Captioning}{8}{subsection.2.3.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.3.4}Beam Search Decoder}{9}{subsection.2.3.4}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.3.5}Grad-CAM dan Feature Visualization}{9}{subsection.2.3.5}\protected@file@percent }
-\@writefile{toc}{\contentsline {chapter}{\numberline {3}Hasil Pengujian}{10}{chapter.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {3}Hasil Pengujian}{11}{chapter.3}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {section}{\numberline {3.1}CNN}{10}{section.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.1}Setup Eksperimen}{10}{subsection.3.1.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.2}Perbandingan Shared vs Non-Shared Parameter}{10}{subsection.3.1.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3.1}{\ignorespaces Perbandingan Conv2D (Shared) vs LocallyConnected2D (Non-Shared)}}{10}{table.caption.26}\protected@file@percent }
-\newlabel{tab:cnn-shared-vs-nonshared}{{3.1}{10}{Perbandingan Conv2D (Shared) vs LocallyConnected2D (Non-Shared)}{table.caption.26}{}}
-\newlabel{tab:cnn-shared-vs-nonshared@cref}{{[table][1][3]3.1}{[1][10][]10}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.3}Pengaruh Jumlah Layer Konvolusi}{10}{subsection.3.1.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3.2}{\ignorespaces Pengaruh Jumlah Layer Konvolusi}}{10}{table.caption.27}\protected@file@percent }
-\newlabel{tab:cnn-var-depth}{{3.2}{10}{Pengaruh Jumlah Layer Konvolusi}{table.caption.27}{}}
-\newlabel{tab:cnn-var-depth@cref}{{[table][2][3]3.2}{[1][10][]10}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.4}Pengaruh Banyak Filter per Layer}{11}{subsection.3.1.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3.3}{\ignorespaces Pengaruh Kombinasi Jumlah Filter}}{11}{table.caption.28}\protected@file@percent }
-\newlabel{tab:cnn-var-filter-count}{{3.3}{11}{Pengaruh Kombinasi Jumlah Filter}{table.caption.28}{}}
-\newlabel{tab:cnn-var-filter-count@cref}{{[table][3][3]3.3}{[1][10][]11}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.5}Pengaruh Ukuran Filter per Layer}{11}{subsection.3.1.5}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3.4}{\ignorespaces Pengaruh Ukuran Kernel Konvolusi}}{11}{table.caption.29}\protected@file@percent }
-\newlabel{tab:cnn-var-kernel-size}{{3.4}{11}{Pengaruh Ukuran Kernel Konvolusi}{table.caption.29}{}}
-\newlabel{tab:cnn-var-kernel-size@cref}{{[table][4][3]3.4}{[1][11][]11}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.6}Pengaruh Jenis Pooling Layer}{11}{subsection.3.1.6}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3.5}{\ignorespaces Perbandingan Jenis Pooling}}{11}{table.caption.30}\protected@file@percent }
-\newlabel{tab:cnn-var-pooling}{{3.5}{11}{Perbandingan Jenis Pooling}{table.caption.30}{}}
-\newlabel{tab:cnn-var-pooling@cref}{{[table][5][3]3.5}{[1][11][]11}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.7}Perbandingan Keras vs From Scratch (Arsitektur Terbaik)}{11}{subsection.3.1.7}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3.6}{\ignorespaces Keras vs From Scratch pada Arsitektur CNN Terbaik}}{11}{table.caption.31}\protected@file@percent }
-\newlabel{tab:cnn-keras-vs-scratch}{{3.6}{11}{Keras vs From Scratch pada Arsitektur CNN Terbaik}{table.caption.31}{}}
-\newlabel{tab:cnn-keras-vs-scratch@cref}{{[table][6][3]3.6}{[1][11][]11}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.2}Simple RNN dan LSTM untuk Image Captioning}{11}{section.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.1}Setup Eksperimen}{11}{subsection.3.2.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}Perbandingan Jumlah Layer: RNN}{12}{subsection.3.2.2}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3.7}{\ignorespaces Variasi Jumlah Layer Recurrent pada Decoder RNN}}{12}{table.caption.32}\protected@file@percent }
-\newlabel{tab:rnn-var-depth}{{3.7}{12}{Variasi Jumlah Layer Recurrent pada Decoder RNN}{table.caption.32}{}}
-\newlabel{tab:rnn-var-depth@cref}{{[table][7][3]3.7}{[1][11][]12}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.3}Perbandingan Jumlah Layer: LSTM}{12}{subsection.3.2.3}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3.8}{\ignorespaces Variasi Jumlah Layer Recurrent pada Decoder LSTM}}{12}{table.caption.33}\protected@file@percent }
-\newlabel{tab:lstm-var-depth}{{3.8}{12}{Variasi Jumlah Layer Recurrent pada Decoder LSTM}{table.caption.33}{}}
-\newlabel{tab:lstm-var-depth@cref}{{[table][8][3]3.8}{[1][12][]12}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.4}Perbandingan Ukuran Hidden State: RNN dan LSTM}{12}{subsection.3.2.4}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3.9}{\ignorespaces Variasi Hidden State pada Decoder RNN/LSTM}}{12}{table.caption.34}\protected@file@percent }
-\newlabel{tab:rnn-lstm-hidden}{{3.9}{12}{Variasi Hidden State pada Decoder RNN/LSTM}{table.caption.34}{}}
-\newlabel{tab:rnn-lstm-hidden@cref}{{[table][9][3]3.9}{[1][12][]12}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.5}Perbandingan RNN vs LSTM}{12}{subsection.3.2.5}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3.10}{\ignorespaces Perbandingan Decoder Terbaik RNN vs LSTM}}{12}{table.caption.35}\protected@file@percent }
-\newlabel{tab:rnn-vs-lstm}{{3.10}{12}{Perbandingan Decoder Terbaik RNN vs LSTM}{table.caption.35}{}}
-\newlabel{tab:rnn-vs-lstm@cref}{{[table][10][3]3.10}{[1][12][]12}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.6}Perbandingan Keras vs From Scratch}{13}{subsection.3.2.6}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3.11}{\ignorespaces Keras vs From Scratch untuk Decoder Terbaik}}{13}{table.caption.36}\protected@file@percent }
-\newlabel{tab:caption-keras-vs-scratch}{{3.11}{13}{Keras vs From Scratch untuk Decoder Terbaik}{table.caption.36}{}}
-\newlabel{tab:caption-keras-vs-scratch@cref}{{[table][11][3]3.11}{[1][12][]13}{}{}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.7}Pengaruh Panjang Maksimum Caption terhadap BLEU-4}{13}{subsection.3.2.7}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {3.12}{\ignorespaces Variasi Panjang Maksimum Caption}}{13}{table.caption.37}\protected@file@percent }
-\newlabel{tab:caption-maxlen}{{3.12}{13}{Variasi Panjang Maksimum Caption}{table.caption.37}{}}
-\newlabel{tab:caption-maxlen@cref}{{[table][12][3]3.12}{[1][13][]13}{}{}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {3.3}Hasil Bonus}{13}{section.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}Init-Inject vs Pre-Inject}{13}{subsection.3.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}Greedy vs Beam Search}{13}{subsection.3.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.3}Visualisasi CNN (Feature Map dan Grad-CAM)}{13}{subsection.3.3.3}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.4}Backward Propagation From Scratch}{13}{subsection.3.3.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3.4}Ringkasan Temuan}{13}{section.3.4}\protected@file@percent }
-\@writefile{toc}{\contentsline {chapter}{\numberline {4}Kesimpulan dan Saran}{14}{chapter.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.1}CNN}{11}{section.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.1}Setup Eksperimen}{11}{subsection.3.1.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.2}Perbandingan Shared vs Non-Shared Parameter}{11}{subsection.3.1.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.1}{\ignorespaces Perbandingan Conv2D (Shared) vs LocallyConnected2D (Non-Shared)}}{11}{table.caption.25}\protected@file@percent }
+\newlabel{tab:cnn-shared-vs-nonshared}{{3.1}{11}{Perbandingan Conv2D (Shared) vs LocallyConnected2D (Non-Shared)}{table.caption.25}{}}
+\newlabel{tab:cnn-shared-vs-nonshared@cref}{{[table][1][3]3.1}{[1][11][]11}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.3}Pengaruh Jumlah Layer Konvolusi}{12}{subsection.3.1.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.2}{\ignorespaces Pengaruh Jumlah Layer Konvolusi}}{12}{table.caption.26}\protected@file@percent }
+\newlabel{tab:cnn-var-depth}{{3.2}{12}{Pengaruh Jumlah Layer Konvolusi}{table.caption.26}{}}
+\newlabel{tab:cnn-var-depth@cref}{{[table][2][3]3.2}{[1][11][]12}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.4}Pengaruh Banyak Filter per Layer}{12}{subsection.3.1.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.3}{\ignorespaces Pengaruh Kombinasi Jumlah Filter}}{12}{table.caption.27}\protected@file@percent }
+\newlabel{tab:cnn-var-filter-count}{{3.3}{12}{Pengaruh Kombinasi Jumlah Filter}{table.caption.27}{}}
+\newlabel{tab:cnn-var-filter-count@cref}{{[table][3][3]3.3}{[1][12][]12}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.5}Pengaruh Ukuran Filter per Layer}{12}{subsection.3.1.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.4}{\ignorespaces Pengaruh Ukuran Kernel Konvolusi}}{12}{table.caption.28}\protected@file@percent }
+\newlabel{tab:cnn-var-kernel-size}{{3.4}{12}{Pengaruh Ukuran Kernel Konvolusi}{table.caption.28}{}}
+\newlabel{tab:cnn-var-kernel-size@cref}{{[table][4][3]3.4}{[1][12][]12}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.6}Pengaruh Jenis Pooling Layer}{12}{subsection.3.1.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.5}{\ignorespaces Perbandingan Jenis Pooling}}{12}{table.caption.29}\protected@file@percent }
+\newlabel{tab:cnn-var-pooling}{{3.5}{12}{Perbandingan Jenis Pooling}{table.caption.29}{}}
+\newlabel{tab:cnn-var-pooling@cref}{{[table][5][3]3.5}{[1][12][]12}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1.7}Perbandingan Keras vs From Scratch (Arsitektur Terbaik)}{13}{subsection.3.1.7}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.6}{\ignorespaces Keras vs From Scratch pada Arsitektur CNN Terbaik}}{13}{table.caption.30}\protected@file@percent }
+\newlabel{tab:cnn-keras-vs-scratch}{{3.6}{13}{Keras vs From Scratch pada Arsitektur CNN Terbaik}{table.caption.30}{}}
+\newlabel{tab:cnn-keras-vs-scratch@cref}{{[table][6][3]3.6}{[1][13][]13}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.2}Simple RNN dan LSTM untuk Image Captioning}{13}{section.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.1}Setup Eksperimen}{13}{subsection.3.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.2}Perbandingan Jumlah Layer: RNN}{13}{subsection.3.2.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.7}{\ignorespaces Variasi Jumlah Layer Recurrent pada Decoder RNN}}{13}{table.caption.31}\protected@file@percent }
+\newlabel{tab:rnn-var-depth}{{3.7}{13}{Variasi Jumlah Layer Recurrent pada Decoder RNN}{table.caption.31}{}}
+\newlabel{tab:rnn-var-depth@cref}{{[table][7][3]3.7}{[1][13][]13}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.3}Perbandingan Jumlah Layer: LSTM}{14}{subsection.3.2.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.8}{\ignorespaces Variasi Jumlah Layer Recurrent pada Decoder LSTM}}{14}{table.caption.32}\protected@file@percent }
+\newlabel{tab:lstm-var-depth}{{3.8}{14}{Variasi Jumlah Layer Recurrent pada Decoder LSTM}{table.caption.32}{}}
+\newlabel{tab:lstm-var-depth@cref}{{[table][8][3]3.8}{[1][13][]14}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.4}Perbandingan Ukuran Hidden State: RNN}{14}{subsection.3.2.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.9}{\ignorespaces Variasi Hidden State pada Decoder RNN}}{14}{table.caption.33}\protected@file@percent }
+\newlabel{tab:rnn-var-hidden}{{3.9}{14}{Variasi Hidden State pada Decoder RNN}{table.caption.33}{}}
+\newlabel{tab:rnn-var-hidden@cref}{{[table][9][3]3.9}{[1][14][]14}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.5}Perbandingan Ukuran Hidden State: LSTM}{14}{subsection.3.2.5}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.10}{\ignorespaces Variasi Hidden State pada Decoder LSTM}}{14}{table.caption.34}\protected@file@percent }
+\newlabel{tab:lstm-var-hidden}{{3.10}{14}{Variasi Hidden State pada Decoder LSTM}{table.caption.34}{}}
+\newlabel{tab:lstm-var-hidden@cref}{{[table][10][3]3.10}{[1][14][]14}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.6}Perbandingan RNN vs LSTM}{14}{subsection.3.2.6}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.11}{\ignorespaces Perbandingan Decoder Terbaik RNN vs LSTM}}{14}{table.caption.35}\protected@file@percent }
+\newlabel{tab:rnn-vs-lstm}{{3.11}{14}{Perbandingan Decoder Terbaik RNN vs LSTM}{table.caption.35}{}}
+\newlabel{tab:rnn-vs-lstm@cref}{{[table][11][3]3.11}{[1][14][]14}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.7}Perbandingan Keras vs From Scratch}{15}{subsection.3.2.7}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.12}{\ignorespaces Keras vs From Scratch untuk Decoder Terbaik}}{15}{table.caption.36}\protected@file@percent }
+\newlabel{tab:caption-keras-vs-scratch}{{3.12}{15}{Keras vs From Scratch untuk Decoder Terbaik}{table.caption.36}{}}
+\newlabel{tab:caption-keras-vs-scratch@cref}{{[table][12][3]3.12}{[1][15][]15}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2.8}Pengaruh Panjang Maksimum Caption terhadap BLEU-4}{15}{subsection.3.2.8}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.13}{\ignorespaces Variasi Panjang Maksimum Caption}}{15}{table.caption.37}\protected@file@percent }
+\newlabel{tab:caption-maxlen}{{3.13}{15}{Variasi Panjang Maksimum Caption}{table.caption.37}{}}
+\newlabel{tab:caption-maxlen@cref}{{[table][13][3]3.13}{[1][15][]15}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.3}Hasil Bonus}{15}{section.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.1}Init-Inject vs Pre-Inject}{15}{subsection.3.3.1}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.14}{\ignorespaces Perbandingan Init-Inject vs Pre-Inject pada Captioning}}{15}{table.caption.38}\protected@file@percent }
+\newlabel{tab:init-vs-preinject}{{3.14}{15}{Perbandingan Init-Inject vs Pre-Inject pada Captioning}{table.caption.38}{}}
+\newlabel{tab:init-vs-preinject@cref}{{[table][14][3]3.14}{[1][15][]15}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.2}Greedy vs Beam Search}{16}{subsection.3.3.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.15}{\ignorespaces Perbandingan Greedy Decoding vs Beam Search}}{16}{table.caption.39}\protected@file@percent }
+\newlabel{tab:greedy-vs-beam}{{3.15}{16}{Perbandingan Greedy Decoding vs Beam Search}{table.caption.39}{}}
+\newlabel{tab:greedy-vs-beam@cref}{{[table][15][3]3.15}{[1][15][]16}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.3}Visualisasi CNN (Feature Map dan Grad-CAM)}{16}{subsection.3.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3.4}Backward Propagation From Scratch}{16}{subsection.3.3.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.16}{\ignorespaces Verifikasi Backward Propagation pada Layer Kritikal}}{16}{table.caption.40}\protected@file@percent }
+\newlabel{tab:gradient-check}{{3.16}{16}{Verifikasi Backward Propagation pada Layer Kritikal}{table.caption.40}{}}
+\newlabel{tab:gradient-check@cref}{{[table][16][3]3.16}{[1][16][]16}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.4}Ringkasan Temuan}{16}{section.3.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.1}CNN Classification}{17}{subsection.3.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.2}Image Captioning (RNN/LSTM)}{17}{subsection.3.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4.3}Kesimpulan Umum}{17}{subsection.3.4.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {4}Kesimpulan dan Saran}{18}{chapter.4}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {section}{\numberline {4.1}Kesimpulan}{14}{section.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4.2}Saran}{14}{section.4.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {chapter}{\numberline {5}Pembagian Tugas}{15}{chapter.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.1}Kesimpulan}{18}{section.4.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.2}Saran}{18}{section.4.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {5}Pembagian Tugas}{19}{chapter.5}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{lot}{\contentsline {table}{\numberline {5.1}{\ignorespaces Pembagian Tugas Anggota Kelompok}}{15}{table.caption.38}\protected@file@percent }
-\newlabel{tab:pembagian-tugas}{{5.1}{15}{Pembagian Tugas Anggota Kelompok}{table.caption.38}{}}
-\newlabel{tab:pembagian-tugas@cref}{{[table][1][5]5.1}{[1][15][]15}{}{}{}}
-\@writefile{toc}{\contentsline {chapter}{Daftar Pustaka}{16}{chapter*.39}\protected@file@percent }
-\gdef \@abspage@last{19}
+\@writefile{lot}{\contentsline {table}{\numberline {5.1}{\ignorespaces Pembagian Tugas Anggota Kelompok}}{19}{table.caption.41}\protected@file@percent }
+\newlabel{tab:pembagian-tugas}{{5.1}{19}{Pembagian Tugas Anggota Kelompok}{table.caption.41}{}}
+\newlabel{tab:pembagian-tugas@cref}{{[table][1][5]5.1}{[1][19][]19}{}{}{}}
+\@writefile{toc}{\contentsline {chapter}{Daftar Pustaka}{20}{chapter*.42}\protected@file@percent }
+\gdef \@abspage@last{23}

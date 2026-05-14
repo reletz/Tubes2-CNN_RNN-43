@@ -34,6 +34,8 @@ Bab ini merangkum rancangan eksperimen dan format evaluasi sesuai spesifikasi tu
 	\label{tab:cnn-shared-vs-nonshared}
 \end{table}
 
+\textbf{Grafik.} Sertakan grafik training loss, validation loss, dan macro F1 untuk perbandingan Conv2D vs LocallyConnected2D.
+
 \textbf{Analisis.} Jelaskan dampak \textit{parameter sharing} terhadap akurasi, efisiensi parameter, dan biaya komputasi.
 
 \subsection{Pengaruh Jumlah Layer Konvolusi}
@@ -53,6 +55,10 @@ Bab ini merangkum rancangan eksperimen dan format evaluasi sesuai spesifikasi tu
 	\label{tab:cnn-var-depth}
 \end{table}
 
+\textbf{Grafik.} Sertakan: (1) kurva macro F1 vs jumlah layer, (2) training loss untuk setiap variasi depth.
+
+\textbf{Analisis.} Diskusikan pengaruh kedalaman model terhadap kapabilitas ekstraksi fitur dan overfitting.
+
 \subsection{Pengaruh Banyak Filter per Layer}
 
 \begin{table}[H]
@@ -69,6 +75,10 @@ Bab ini merangkum rancangan eksperimen dan format evaluasi sesuai spesifikasi tu
 	\end{tabular}
 	\label{tab:cnn-var-filter-count}
 \end{table}
+
+\textbf{Grafik.} Sertakan: (1) kurva macro F1 untuk setiap kombinasi filter, (2) plot jumlah parameter vs macro F1.
+
+\textbf{Analisis.} Analisis trade-off antara kapasitas model (jumlah filter) terhadap akurasi dan computational cost.
 
 \subsection{Pengaruh Ukuran Filter per Layer}
 
@@ -87,6 +97,10 @@ Bab ini merangkum rancangan eksperimen dan format evaluasi sesuai spesifikasi tu
 	\label{tab:cnn-var-kernel-size}
 \end{table}
 
+\textbf{Grafik.} Sertakan: (1) kurva macro F1 untuk setiap kombinasi kernel, (2) comparison spatial receptive field vs macro F1.
+
+\textbf{Analisis.} Diskusikan pengaruh receptive field (ukuran kernel) terhadap kemampuan menangkap pola visual dan akurasi klasifikasi.
+
 \subsection{Pengaruh Jenis Pooling Layer}
 
 \begin{table}[H]
@@ -102,6 +116,10 @@ Bab ini merangkum rancangan eksperimen dan format evaluasi sesuai spesifikasi tu
 	\end{tabular}
 	\label{tab:cnn-var-pooling}
 \end{table}
+
+\textbf{Grafik.} Sertakan: training loss dan validation loss untuk kedua pooling strategy.
+
+\textbf{Analisis.} Bandingkan efektivitas max pooling vs average pooling dalam menjaga informasi penting dan mengurangi overfitting.
 
 \subsection{Perbandingan Keras vs From Scratch (Arsitektur Terbaik)}
 
@@ -119,7 +137,9 @@ Bab ini merangkum rancangan eksperimen dan format evaluasi sesuai spesifikasi tu
 	\label{tab:cnn-keras-vs-scratch}
 \end{table}
 
-\textbf{Grafik wajib.} Sertakan grafik train loss dan validation loss untuk setiap eksperimen utama CNN.
+\textbf{Grafik.} Sertakan: (1) kurva training loss (Keras vs Scratch), (2) kurva validation accuracy, (3) prediksi test accuracy.
+
+\textbf{Analisis.} Verifikasi keselarasan numerik implementasi \textit{from scratch} dengan Keras, termasuk backward propagation accuracy jika tersedia.
 
 \section{Simple RNN dan LSTM untuk Image Captioning}
 
@@ -150,6 +170,10 @@ Bab ini merangkum rancangan eksperimen dan format evaluasi sesuai spesifikasi tu
 	\label{tab:rnn-var-depth}
 \end{table}
 
+\textbf{Grafik.} Training loss, validation loss, dan BLEU-4 vs jumlah layer.
+
+\textbf{Analisis.} Diskusikan pengaruh kedalaman decoder RNN terhadap representasi kontekstual dan kualitas caption.
+
 \subsection{Perbandingan Jumlah Layer: LSTM}
 
 \begin{table}[H]
@@ -167,23 +191,51 @@ Bab ini merangkum rancangan eksperimen dan format evaluasi sesuai spesifikasi tu
 	\label{tab:lstm-var-depth}
 \end{table}
 
-\subsection{Perbandingan Ukuran Hidden State: RNN dan LSTM}
+\textbf{Grafik.} Training loss, validation loss, dan BLEU-4 vs jumlah layer.
+
+\textbf{Analisis.} Bandingkan pengaruh kedalaman pada RNN vs LSTM, termasuk kemampuan menangani long-term dependencies.
+
+\subsection{Perbandingan Ukuran Hidden State: RNN}
 
 \begin{table}[H]
 	\centering
-	\caption{Variasi Hidden State pada Decoder RNN/LSTM}
-	\begin{tabular}{lcccc}
+	\caption{Variasi Hidden State pada Decoder RNN}
+	\begin{tabular}{lccc}
 		\toprule
-		\textbf{Decoder} & \textbf{Hidden Units} & \textbf{BLEU-4} & \textbf{METEOR} & \textbf{Waktu Inferensi} \\
+		\textbf{Hidden Units} & \textbf{BLEU-4} & \textbf{METEOR} & \textbf{Waktu Inferensi} \\
 		\midrule
-		RNN & 128 & [isi] & [isi] & [isi] \\
-		RNN & 512 & [isi] & [isi] & [isi] \\
-		LSTM & 128 & [isi] & [isi] & [isi] \\
-		LSTM & 512 & [isi] & [isi] & [isi] \\
+		128 & [isi] & [isi] & [isi] \\
+		256 & [isi] & [isi] & [isi] \\
+		512 & [isi] & [isi] & [isi] \\
 		\bottomrule
 	\end{tabular}
-	\label{tab:rnn-lstm-hidden}
+	\label{tab:rnn-var-hidden}
 \end{table}
+
+\textbf{Grafik.} BLEU-4 vs hidden units, serta kurva training/validation loss.
+
+\textbf{Analisis.} Jelaskan pengaruh dimensi hidden state terhadap kapabilitas representasi dan risiko overfitting pada RNN.
+
+\subsection{Perbandingan Ukuran Hidden State: LSTM}
+
+\begin{table}[H]
+	\centering
+	\caption{Variasi Hidden State pada Decoder LSTM}
+	\begin{tabular}{lccc}
+		\toprule
+		\textbf{Hidden Units} & \textbf{BLEU-4} & \textbf{METEOR} & \textbf{Waktu Inferensi} \\
+		\midrule
+		128 & [isi] & [isi] & [isi] \\
+		256 & [isi] & [isi] & [isi] \\
+		512 & [isi] & [isi] & [isi] \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:lstm-var-hidden}
+\end{table}
+
+\textbf{Grafik.} BLEU-4 vs hidden units, serta kurva training/validation loss.
+
+\textbf{Analisis.} Bandingkan efek hidden state dimensionality pada RNN vs LSTM, termasuk gradient flow stability.
 
 \subsection{Perbandingan RNN vs LSTM}
 
@@ -201,7 +253,9 @@ Bab ini merangkum rancangan eksperimen dan format evaluasi sesuai spesifikasi tu
 	\label{tab:rnn-vs-lstm}
 \end{table}
 
-\textbf{Analisis kualitatif (minimal 10 contoh).} Sertakan gambar, caption ground truth, prediksi RNN, prediksi LSTM, serta score masing-masing contoh (tinggi/sedang/rendah).
+\textbf{Grafik.} Kurva training loss, validation loss, dan BLEU-4/METEOR untuk RNN vs LSTM.
+
+\textbf{Analisis kualitatif (minimal 10 contoh).} Sertakan: gambar, caption ground truth, prediksi RNN, prediksi LSTM, serta skor BLEU-4 masing-masing. Kelompokkan contoh menjadi: (1) kasus RNN lebih baik, (2) kasus LSTM lebih baik, (3) kasus keduanya mirip, (4) kasus keduanya buruk.
 
 \subsection{Perbandingan Keras vs From Scratch}
 
@@ -221,6 +275,10 @@ Bab ini merangkum rancangan eksperimen dan format evaluasi sesuai spesifikasi tu
 	\label{tab:caption-keras-vs-scratch}
 \end{table}
 
+\textbf{Grafik.} Kurva training/validation loss untuk Keras dan from-scratch RNN dan LSTM.
+
+\textbf{Analisis.} Verifikasi keselarasan numerik implementasi \textit{from scratch} dengan Keras pada captioning, khususnya pada decoding quality (BLEU-4/METEOR).
+
 \subsection{Pengaruh Panjang Maksimum Caption terhadap BLEU-4}
 
 \begin{table}[H]
@@ -238,28 +296,132 @@ Bab ini merangkum rancangan eksperimen dan format evaluasi sesuai spesifikasi tu
 	\label{tab:caption-maxlen}
 \end{table}
 
+\textbf{Grafik.} BLEU-4 dan METEOR vs panjang maksimum caption.
+
+\textbf{Analisis.} Diskusikan trade-off antara panjang caption terhadap kualitas (BLEU-4), kelengkapan informasi, dan computational cost.
+
 \section{Hasil Bonus}
 
 \subsection{Init-Inject vs Pre-Inject}
-Bandingkan skor BLEU-4 dan waktu eksekusi antara \textit{pre-inject} (utama) dan \textit{init-inject} (bonus).
+
+\begin{table}[H]
+	\centering
+	\caption{Perbandingan Init-Inject vs Pre-Inject pada Captioning}
+	\begin{tabular}{lcccc}
+		\toprule
+		\textbf{Skema} & \textbf{Merge Mode} & \textbf{BLEU-4} & \textbf{METEOR} & \textbf{Waktu Inferensi} \\
+		\midrule
+		Pre-Inject & -- & [isi] & [isi] & [isi] \\
+		Init-Inject & Add & [isi] & [isi] & [isi] \\
+		Init-Inject & Concat & [isi] & [isi] & [isi] \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:init-vs-preinject}
+\end{table}
+
+\textbf{Analisis.} Bandingkan kualitas caption dan efisiensi komputasi antara pre-inject (utama) dan init-inject (bonus) dengan dua merge mode, serta dampaknya terhadap gradient flow dan model convergence.
 
 \subsection{Greedy vs Beam Search}
-Bandingkan kualitas caption (BLEU-4/METEOR) untuk \textit{greedy decoding} dan \textit{beam search} dengan $k=3$ atau $k=5$.
+
+\begin{table}[H]
+	\centering
+	\caption{Perbandingan Greedy Decoding vs Beam Search}
+	\begin{tabular}{lccccc}
+		\toprule
+		\textbf{Decoder} & \textbf{Strategi} & \textbf{Beam Width} & \textbf{BLEU-4} & \textbf{METEOR} & \textbf{Waktu Inferensi} \\
+		\midrule
+		RNN & Greedy & -- & [isi] & [isi] & [isi] \\
+		RNN & Beam Search & 3 & [isi] & [isi] & [isi] \\
+		RNN & Beam Search & 5 & [isi] & [isi] & [isi] \\
+		LSTM & Greedy & -- & [isi] & [isi] & [isi] \\
+		LSTM & Beam Search & 3 & [isi] & [isi] & [isi] \\
+		LSTM & Beam Search & 5 & [isi] & [isi] & [isi] \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:greedy-vs-beam}
+\end{table}
+
+\textbf{Analisis.} Analisis trade-off antara kualitas caption (BLEU-4/METEOR) dan waktu komputasi untuk greedy decoding vs beam search dengan berbagai beam width ($k=3, 5$).
 
 \subsection{Visualisasi CNN (Feature Map dan Grad-CAM)}
-Sertakan visualisasi feature map intermediate dan overlay Grad-CAM untuk beberapa contoh gambar benar/salah klasifikasi.
+
+Sertakan visualisasi untuk arsitektur CNN terbaik:
+\begin{enumerate}
+	\item \textbf{Feature map intermediate}: Tampilkan aktivasi feature map di beberapa layer (layer 1, tengah, layer terakhir) untuk 3-5 contoh gambar.
+	\item \textbf{Grad-CAM overlay}: Overlay heatmap Grad-CAM di atas gambar asli untuk 5 contoh:
+	\begin{itemize}
+		\item 2 contoh klasifikasi benar (high confidence).
+		\item 2 contoh klasifikasi salah (model prediksi lain).
+		\item 1 contoh borderline (low confidence).
+	\end{itemize}
+	\item \textbf{Analisis visual}: Diskusikan apakah heatmap selaras dengan region penting dalam gambar (e.g., objek utama).
+\end{enumerate}
 
 \subsection{Backward Propagation From Scratch}
-Ringkas hasil verifikasi numerik atau sanity-check untuk layer yang memiliki \texttt{backward()} (misalnya gradien tidak \textit{NaN}, bentuk tensor konsisten, dan selaras dengan ekspektasi teoretis).
+
+\begin{table}[H]
+	\centering
+	\caption{Verifikasi Backward Propagation pada Layer Kritikal}
+	\begin{tabular}{lcc}
+		\toprule
+		\textbf{Layer} & \textbf{Gradient Check (Numerik vs Analitik)} & \textbf{Status} \\
+		\midrule
+		Conv2D & [isi] & [Passed/Failed] \\
+		MaxPool2D & [isi] & [Passed/Failed] \\
+		AvgPool2D & [isi] & [Passed/Failed] \\
+		Dense & [isi] & [Passed/Failed] \\
+		LSTMCell & [isi] & [Passed/Failed] \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:gradient-check}
+\end{table}
+
+\textbf{Verifikasi numeric.} Sertakan:
+\begin{itemize}
+	\item Gradient checking dengan finite difference (h = 1e-5) untuk setiap layer.
+	\item Visualisasi: plot perbedaan relative antara numerik dan analitik gradient.
+	\item Ringkasan: apakah semua gradient check pass (relative error < 1e-4)?
+\end{itemize}
 
 \section{Ringkasan Temuan}
 
-Tuliskan poin-poin temuan utama setelah seluruh tabel dan grafik diisi, mencakup:
+Tuliskan poin-poin temuan utama setelah seluruh tabel dan grafik diisi, dengan struktur berikut:
+
+\subsection{CNN Classification}
 
 \begin{enumerate}
-	\item konfigurasi CNN terbaik dan alasannya,
-	\item konfigurasi captioning terbaik dan alasannya,
-	\item perbedaan perilaku RNN vs LSTM,
-	\item kesenjangan Keras vs from scratch,
-	\item dampak fitur bonus terhadap kualitas hasil.
+	\item \textbf{Konfigurasi terbaik}: Laporan arsitektur CNN dengan macro F1-score tertinggi, termasuk jumlah layer, filter distribution, kernel size, dan pooling type.
+	\item \textbf{Pengaruh hyperparameter}:
+	\begin{itemize}
+		\item Depth: apakah lebih dalam selalu lebih baik? Adakah tanda overfitting?
+		\item Filter count: trade-off antara model capacity dan accuracy.
+		\item Kernel size: pengaruh receptive field terhadap spatial pattern recognition.
+		\item Pooling strategy: Max vs Average dalam konteks dataset Intel Image.
+	\end{itemize}
+	\item \textbf{Shared vs non-shared}: Analisis keuntungan/kerugian Conv2D vs LocallyConnected2D dalam hal akurasi, parameter efficiency, dan training time.
+	\item \textbf{From scratch vs Keras}: Verifikasi keselarasan numerik dan gradient correctness.
+\end{enumerate}
+
+\subsection{Image Captioning (RNN/LSTM)}
+
+\begin{enumerate}
+	\item \textbf{Konfigurasi terbaik}: Laporan decoder terbaik (RNN atau LSTM) dengan BLEU-4 tertinggi, termasuk jumlah layer dan hidden units.
+	\item \textbf{RNN vs LSTM}: Analisis perbedaan dalam kemampuan menangani long-term dependencies dan kualitas caption.
+	\item \textbf{Pengaruh hyperparameter pada captioning}:
+	\begin{itemize}
+		\item Depth: pengaruh pada representasi kontekstual dan gradient flow.
+		\item Hidden units: trade-off antara kapabilitas dan overfitting.
+		\item Max caption length: dampak terhadap BLEU-4 dan computational cost.
+	\end{itemize}
+	\item \textbf{Decoding strategy}: Analisis greedy vs beam search ($k=3, 5$) dalam kualitas dan efisiensi.
+	\item \textbf{Bonus features}: Perbandingan init-inject vs pre-inject dan pengaruh merge mode ("add" vs "concat").
+	\item \textbf{From scratch vs Keras}: Verifikasi keselarasan pada BLEU-4 dan loss curve.
+\end{enumerate}
+
+\subsection{Kesimpulan Umum}
+
+\begin{enumerate}
+	\item Insight utama tentang design choices yang optimal untuk kedua tugas.
+	\item Perbedaan karakteristik CNN (discriminative) vs captioning (generative).
+	\item Rekomendasi best practices untuk implementasi \textit{from scratch} yang sesuai Keras.
 \end{enumerate}

@@ -155,48 +155,6 @@ Implementasi menggunakan \texttt{sliding\_window\_view} dan \texttt{tensordot} a
     \end{tikzpicture}%
     }
     \caption{Alur forward propagation CNN dari konvolusi hingga softmax}
-
-    \subsection{Ringkasan Encoder-Decoder}
-
-    Secara ringkas, arsitektur image captioning pada proyek ini terdiri dari dua bagian besar. Encoder CNN bertugas mengubah citra mentah menjadi representasi fitur yang padat, sedangkan decoder RNN atau LSTM bertugas mengubah representasi tersebut menjadi urutan kata.
-
-    Perbedaan utama di antara keduanya ada pada mekanisme pemrosesan urutan. RNN sederhana memanfaatkan hidden state tunggal $h_t$, sedangkan LSTM menambahkan cell state $c_t$ dan gate untuk menjaga informasi jangka panjang. Namun, dari sudut pandang pipeline, keduanya tetap memakai alur yang sama: gambar masuk ke CNN, fitur hasil encoder diproyeksikan ke embedding space, lalu decoder menghasilkan token berikutnya sampai caption selesai.
-
-    \begin{figure}[H]
-        \centering
-        \resizebox{0.96\linewidth}{!}{%
-        \begin{tikzpicture}[node distance=0.75cm and 0.6cm, >=Stealth, every node/.style={font=\small}]
-            \node[draw, rounded corners, fill=blue!10] (raw) {Raw Image};
-            \node[draw, rounded corners, fill=green!15, right=of raw] (cnn) {CNN Encoder};
-            \node[draw, rounded corners, fill=yellow!20, right=of cnn] (feat) {Feature Vector};
-            \node[draw, rounded corners, fill=orange!20, right=of feat] (proj) {Dense Projection};
-
-            \node[draw, rounded corners, fill=purple!15, below left=0.95cm and 0.15cm of proj] (rnn) {RNN Decoder};
-            \node[draw, rounded corners, fill=purple!15, below right=0.95cm and 0.15cm of proj] (lstm) {LSTM Decoder};
-
-            \node[draw, rounded corners, fill=red!15, below=of rnn] (soft1) {Softmax};
-            \node[draw, rounded corners, fill=red!15, below=of lstm] (soft2) {Softmax};
-
-            \node[draw, rounded corners, fill=gray!15, below=1.0cm of proj] (caption) {Generated Caption};
-
-            \draw[->] (raw) -- (cnn);
-            \draw[->] (cnn) -- (feat);
-            \draw[->] (feat) -- (proj);
-            \draw[->] (proj) -- (rnn);
-            \draw[->] (proj) -- (lstm);
-            \draw[->] (rnn) -- (soft1);
-            \draw[->] (lstm) -- (soft2);
-            \draw[->] (soft1) -- (caption);
-            \draw[->] (soft2) -- (caption);
-
-            \draw[->, dashed] (caption.west) to[out=180,in=270] node[left] {token berikutnya} (rnn.south);
-            \draw[->, dashed] (caption.east) to[out=0,in=270] node[right] {token berikutnya} (lstm.south);
-        \end{tikzpicture}%
-        }
-        \caption{Ringkasan gabungan encoder-decoder untuk CNN + RNN/LSTM image captioning}
-        \label{fig:encoder-decoder-summary}
-    \end{figure}
-    \label{fig:cnn-forward-flow}
 \end{figure}
 
 \subsubsection{LocallyConnected2D (Non-Shared Parameters)}
@@ -392,16 +350,133 @@ Secara konseptual, arsitektur captioning yang dipakai mengikuti pola encoder-dec
 \section{Implementasi Bonus}
 
 \subsection{Batch Inference}
-Seluruh layer utama dirancang menerima dimensi batch. Contoh: \texttt{Conv2D.forward()} menerima format NHWC dengan sumbu pertama sebagai batch.
+Seluruh layer dirancang untuk memproses batch secara efisien dengan format NHWC. Dimensi batch tersimpan pada sumbu pertama, memungkinkan forward pass vectorized untuk multiple images sekaligus. Contoh: \texttt{Conv2D.forward()} dan \texttt{SimpleRNNCell.forward()} keduanya menerima input dengan dimensi batch $N$.
+
+\begin{lstlisting}[language=Python, basicstyle=\ttfamily\small]
+# Conv2D batch processing (NHWC format)
+def forward(self, x: np.ndarray) -> np.ndarray:
+    # x shape: (N, H, W, C_in)
+    N, H, W, C = x.shape
+    windows = sliding_window_view(x_padded, 
+                                  window_shape=(kH, kW, C))
+    patches = windows.reshape(N, out_h, out_w, k_flat)
+    out = np.tensordot(patches, kernel_flat, 
+                       axes=([3], [0]))  # Batched matmul
+    return out  # shape: (N, out_h, out_w, filters)
+\end{lstlisting}
 
 \subsection{Backward Propagation}
-Implementasi \texttt{backward()} tersedia pada beberapa layer kritikal, termasuk \texttt{Conv2D}, \texttt{MaxPool2D}, \texttt{AvgPool2D}, \texttt{GlobalPooling}, \texttt{Dense}, dan \texttt{LSTMCell}.
+Implementasi \texttt{backward()} tersedia pada 8 dari 11 layer:
+\begin{itemize}
+    \item \textit{Convolutional layers}: \texttt{Conv2D} (gradient untuk kernel dan bias menggunakan batched matrix operations).
+    \item \textit{Activation dan pooling}: \texttt{Flatten}, \texttt{MaxPool2D}, \texttt{AvgPool2D}, \texttt{GlobalAvgPooling2D}, \texttt{GlobalMaxPooling2D}.
+    \item \textit{Dense dan recurrent}: \texttt{Dense}, \texttt{LSTMCell} (full backpropagation untuk empat gerbang LSTM).
+\end{itemize}
+Gradient mengalir balik melalui chain rule, memungkinkan training dan fine-tuning model \textit{from scratch}.
+
+\begin{lstlisting}[language=Python, basicstyle=\ttfamily\small]
+# LSTMCell backward: gradient melalui 4 gates
+def backward(self, grad_h, grad_c=None) -> tuple:
+    # Compute gate pre-activations gradients
+    di_pre = di * i * (1 - i)  # input gate
+    df_pre = df * f * (1 - f)  # forget gate
+    dg_pre = dg * (1 - g**2)   # cell candidate
+    do_pre = do * o * (1 - o)  # output gate
+    
+    dz = np.concatenate([di_pre, df_pre, dg_pre, do_pre], 
+                         axis=1)
+    self.kernel_gradients = x.T @ dz
+    self.recurrent_kernel_gradients = h_prev.T @ dz
+    dx = dz @ self.kernel.T
+    dh_prev = dz @ self.recurrent_kernel.T
+    return dx, dh_prev, dc_prev
+\end{lstlisting}
 
 \subsection{Init-Inject Captioning}
-Varian \texttt{InitInjectCaptioner} menggabungkan konteks gambar dengan hidden representation caption menggunakan mode \texttt{add} atau \texttt{concat}.
+Varian \texttt{InitInjectCaptioner} mengimplementasikan skema alternatif di mana konteks gambar digabungkan dengan caption hidden state di setiap timestep. Parameter \texttt{merge\_mode} mengontrol kombinasi:
+\begin{itemize}
+    \item \texttt{"add"}: $h_t' = h_t + \text{proj\_img}$ (element-wise addition).
+    \item \texttt{"concat"}: $h_t' = \text{concat}(h_t, \text{proj\_img})$ (feature concatenation, meningkatkan dimensi).
+\end{itemize}
+Kedua mode tersebut memerlukan bobot output dengan dimensi sesuai.
+
+\begin{lstlisting}[language=Python, basicstyle=\ttfamily\small]
+# InitInjectCaptioner: merge image feature ke hidden state
+class InitInjectCaptioner(ImageCaptioner):
+    def forward(self, image_features, token_ids):
+        proj_img = self._project_image(image_features)
+        token_embs = self.embedding.forward(token_ids)
+        states = self._initialize_states(batch_size)
+        
+        for t in range(token_embs.shape[1]):
+            curr = token_embs[:, t, :]
+            for layer in self.recurrent_layers:
+                state.h = layer.forward(curr, state.h)
+                curr = state.h
+            
+            # Merge modes
+            if self.merge_mode == "add":
+                merged = curr + proj_img  # Element-wise
+            else:  # "concat"
+                merged = np.concatenate([curr, proj_img], 
+                                        axis=1)  # 2x size
+            
+            outputs.append(merged @ self.output_kernel 
+                          + self.output_bias)
+        return np.stack(outputs, axis=1)
+\end{lstlisting}
 
 \subsection{Beam Search Decoder}
-Selain \textit{greedy decoding}, disediakan \textit{beam search} dengan lebar beam terkontrol (misalnya $k=3$ atau $k=5$) untuk meningkatkan kualitas urutan caption.
+Selain \textit{greedy decoding} (memilih token dengan probabilitas tertinggi), modul captioning menyediakan \texttt{beam\_search\_decode()} untuk pencarian lebih optimal. Metode ini mempertahankan \textit{beam\_width} hipotesis terbaik (misalnya $k=3$ atau $k=5$) dan memperpanjangnya secara paralel sampai akhir sequence, menghasilkan caption dengan higher quality.
+
+\begin{lstlisting}[language=Python, basicstyle=\ttfamily\small]
+# Beam search: maintain top-k hypotheses
+def generate_captions(self, image_features, start_token, 
+                      end_token, method="greedy", 
+                      beam_width=3, max_len=20):
+    if method == "greedy":
+        return self.greedy_decode(image_features, 
+                                  start_token, 
+                                  end_token, max_len)
+    else:
+        return self.beam_search_decode(
+            image_features, start_token, end_token, 
+            beam_width, max_len)
+
+# Usage
+captions_greedy = captioner.generate_captions(
+    image_features, start_token=1, end_token=2, 
+    method="greedy")
+captions_beam = captioner.generate_captions(
+    image_features, start_token=1, end_token=2, 
+    method="beam", beam_width=5)
+\end{lstlisting}
 
 \subsection{Grad-CAM dan Feature Visualization}
-\texttt{CNNClassifier} menyimpan aktivasi intermediate untuk visualisasi feature map, serta menyediakan utilitas \textit{Grad-CAM} untuk menandai area gambar yang berkontribusi kuat terhadap prediksi.
+\texttt{CNNClassifier} menyimpan intermediate activation maps pada setiap konvolusi terakhir (\texttt{intermediate\_activations}). Method \texttt{grad\_cam()} menghitung:
+\begin{enumerate}
+    \item Backpropagasi gradient dari output class logit ke activation map terakhir.
+    \item Global average pooling gradient per channel untuk mendapat \textit{importance weights}.
+    \item Weighted sum: $\text{heatmap} = \sum_k w_k \cdot A_k$ (dengan ReLU untuk menghilangkan kontribusi negatif).
+\end{enumerate}
+Utilitas \texttt{grad\_cam\_overlay()} menggabungkan heatmap dengan gambar asli menggunakan color ramp (red-yellow) dan opacity $\alpha$, membantu interpretasi prediksi model.
+
+\begin{lstlisting}[language=Python, basicstyle=\ttfamily\small]
+# Grad-CAM visualization
+heatmap, target_class, probs = model.grad_cam(
+    image, class_index=None, normalize=True)
+# heatmap: 2D spatial importance map
+# target_class: predicted class index
+# probs: softmax output
+
+# Overlay on original image
+overlay, resized_hm, cls, probs = model.grad_cam_overlay(
+    image, alpha=0.45)
+# overlay: blended image (float32 in [0,1])
+# resized_hm: heatmap resized to image size
+
+from src.utils.gradcam import save_overlay
+output_path = save_overlay(image, heatmap, 
+                           "output/gradcam.png", 
+                           alpha=0.45)
+\end{lstlisting}

@@ -20,47 +20,50 @@
 \contentsline {subsection}{\numberline {2.2.1}Forward Propagation CNN}{5}{subsection.2.2.1}%
 \contentsline {subsubsection}{Conv2D (Shared Parameters)}{5}{section*.12}%
 \contentsline {paragraph}{Step-by-step alur CNN (inference).}{5}{section*.13}%
-\contentsline {subsection}{\numberline {2.2.2}Ringkasan Encoder-Decoder}{6}{subsection.2.2.2}%
-\contentsline {subsubsection}{LocallyConnected2D (Non-Shared Parameters)}{6}{section*.16}%
-\contentsline {paragraph}{Step-by-step alur LocallyConnected2D.}{6}{section*.17}%
-\contentsline {subsubsection}{Pooling dan Head}{6}{section*.19}%
-\contentsline {subsubsection}{Dense + Softmax}{7}{section*.20}%
-\contentsline {subsection}{\numberline {2.2.3}Forward Propagation RNN}{7}{subsection.2.2.3}%
-\contentsline {paragraph}{Step-by-step alur encoder CNN $\rightarrow $ decoder RNN $\rightarrow $ softmax.}{7}{section*.21}%
-\contentsline {subsection}{\numberline {2.2.4}Forward Propagation LSTM}{7}{subsection.2.2.4}%
-\contentsline {paragraph}{Step-by-step alur LSTM decoder.}{8}{section*.23}%
-\contentsline {subsection}{\numberline {2.2.5}Diagram Encoder-Decoder}{8}{subsection.2.2.5}%
+\contentsline {subsubsection}{LocallyConnected2D (Non-Shared Parameters)}{5}{section*.15}%
+\contentsline {paragraph}{Step-by-step alur LocallyConnected2D.}{5}{section*.16}%
+\contentsline {subsubsection}{Pooling dan Head}{6}{section*.18}%
+\contentsline {subsubsection}{Dense + Softmax}{6}{section*.19}%
+\contentsline {subsection}{\numberline {2.2.2}Forward Propagation RNN}{6}{subsection.2.2.2}%
+\contentsline {paragraph}{Step-by-step alur encoder CNN $\rightarrow $ decoder RNN $\rightarrow $ softmax.}{6}{section*.20}%
+\contentsline {subsection}{\numberline {2.2.3}Forward Propagation LSTM}{7}{subsection.2.2.3}%
+\contentsline {paragraph}{Step-by-step alur LSTM decoder.}{7}{section*.22}%
+\contentsline {subsection}{\numberline {2.2.4}Diagram Encoder-Decoder}{7}{subsection.2.2.4}%
 \contentsline {section}{\numberline {2.3}Implementasi Bonus}{8}{section.2.3}%
 \contentsline {subsection}{\numberline {2.3.1}Batch Inference}{8}{subsection.2.3.1}%
 \contentsline {subsection}{\numberline {2.3.2}Backward Propagation}{8}{subsection.2.3.2}%
-\contentsline {subsection}{\numberline {2.3.3}Init-Inject Captioning}{9}{subsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.3.3}Init-Inject Captioning}{8}{subsection.2.3.3}%
 \contentsline {subsection}{\numberline {2.3.4}Beam Search Decoder}{9}{subsection.2.3.4}%
 \contentsline {subsection}{\numberline {2.3.5}Grad-CAM dan Feature Visualization}{9}{subsection.2.3.5}%
-\contentsline {chapter}{\numberline {3}Hasil Pengujian}{10}{chapter.3}%
-\contentsline {section}{\numberline {3.1}CNN}{10}{section.3.1}%
-\contentsline {subsection}{\numberline {3.1.1}Setup Eksperimen}{10}{subsection.3.1.1}%
-\contentsline {subsection}{\numberline {3.1.2}Perbandingan Shared vs Non-Shared Parameter}{10}{subsection.3.1.2}%
-\contentsline {subsection}{\numberline {3.1.3}Pengaruh Jumlah Layer Konvolusi}{10}{subsection.3.1.3}%
-\contentsline {subsection}{\numberline {3.1.4}Pengaruh Banyak Filter per Layer}{11}{subsection.3.1.4}%
-\contentsline {subsection}{\numberline {3.1.5}Pengaruh Ukuran Filter per Layer}{11}{subsection.3.1.5}%
-\contentsline {subsection}{\numberline {3.1.6}Pengaruh Jenis Pooling Layer}{11}{subsection.3.1.6}%
-\contentsline {subsection}{\numberline {3.1.7}Perbandingan Keras vs From Scratch (Arsitektur Terbaik)}{11}{subsection.3.1.7}%
-\contentsline {section}{\numberline {3.2}Simple RNN dan LSTM untuk Image Captioning}{11}{section.3.2}%
-\contentsline {subsection}{\numberline {3.2.1}Setup Eksperimen}{11}{subsection.3.2.1}%
-\contentsline {subsection}{\numberline {3.2.2}Perbandingan Jumlah Layer: RNN}{12}{subsection.3.2.2}%
-\contentsline {subsection}{\numberline {3.2.3}Perbandingan Jumlah Layer: LSTM}{12}{subsection.3.2.3}%
-\contentsline {subsection}{\numberline {3.2.4}Perbandingan Ukuran Hidden State: RNN dan LSTM}{12}{subsection.3.2.4}%
-\contentsline {subsection}{\numberline {3.2.5}Perbandingan RNN vs LSTM}{12}{subsection.3.2.5}%
-\contentsline {subsection}{\numberline {3.2.6}Perbandingan Keras vs From Scratch}{13}{subsection.3.2.6}%
-\contentsline {subsection}{\numberline {3.2.7}Pengaruh Panjang Maksimum Caption terhadap BLEU-4}{13}{subsection.3.2.7}%
-\contentsline {section}{\numberline {3.3}Hasil Bonus}{13}{section.3.3}%
-\contentsline {subsection}{\numberline {3.3.1}Init-Inject vs Pre-Inject}{13}{subsection.3.3.1}%
-\contentsline {subsection}{\numberline {3.3.2}Greedy vs Beam Search}{13}{subsection.3.3.2}%
-\contentsline {subsection}{\numberline {3.3.3}Visualisasi CNN (Feature Map dan Grad-CAM)}{13}{subsection.3.3.3}%
-\contentsline {subsection}{\numberline {3.3.4}Backward Propagation From Scratch}{13}{subsection.3.3.4}%
-\contentsline {section}{\numberline {3.4}Ringkasan Temuan}{13}{section.3.4}%
-\contentsline {chapter}{\numberline {4}Kesimpulan dan Saran}{14}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Kesimpulan}{14}{section.4.1}%
-\contentsline {section}{\numberline {4.2}Saran}{14}{section.4.2}%
-\contentsline {chapter}{\numberline {5}Pembagian Tugas}{15}{chapter.5}%
-\contentsline {chapter}{Daftar Pustaka}{16}{chapter*.39}%
+\contentsline {chapter}{\numberline {3}Hasil Pengujian}{11}{chapter.3}%
+\contentsline {section}{\numberline {3.1}CNN}{11}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Setup Eksperimen}{11}{subsection.3.1.1}%
+\contentsline {subsection}{\numberline {3.1.2}Perbandingan Shared vs Non-Shared Parameter}{11}{subsection.3.1.2}%
+\contentsline {subsection}{\numberline {3.1.3}Pengaruh Jumlah Layer Konvolusi}{12}{subsection.3.1.3}%
+\contentsline {subsection}{\numberline {3.1.4}Pengaruh Banyak Filter per Layer}{12}{subsection.3.1.4}%
+\contentsline {subsection}{\numberline {3.1.5}Pengaruh Ukuran Filter per Layer}{12}{subsection.3.1.5}%
+\contentsline {subsection}{\numberline {3.1.6}Pengaruh Jenis Pooling Layer}{12}{subsection.3.1.6}%
+\contentsline {subsection}{\numberline {3.1.7}Perbandingan Keras vs From Scratch (Arsitektur Terbaik)}{13}{subsection.3.1.7}%
+\contentsline {section}{\numberline {3.2}Simple RNN dan LSTM untuk Image Captioning}{13}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Setup Eksperimen}{13}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Perbandingan Jumlah Layer: RNN}{13}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Perbandingan Jumlah Layer: LSTM}{14}{subsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.2.4}Perbandingan Ukuran Hidden State: RNN}{14}{subsection.3.2.4}%
+\contentsline {subsection}{\numberline {3.2.5}Perbandingan Ukuran Hidden State: LSTM}{14}{subsection.3.2.5}%
+\contentsline {subsection}{\numberline {3.2.6}Perbandingan RNN vs LSTM}{14}{subsection.3.2.6}%
+\contentsline {subsection}{\numberline {3.2.7}Perbandingan Keras vs From Scratch}{15}{subsection.3.2.7}%
+\contentsline {subsection}{\numberline {3.2.8}Pengaruh Panjang Maksimum Caption terhadap BLEU-4}{15}{subsection.3.2.8}%
+\contentsline {section}{\numberline {3.3}Hasil Bonus}{15}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Init-Inject vs Pre-Inject}{15}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Greedy vs Beam Search}{16}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.3.3}Visualisasi CNN (Feature Map dan Grad-CAM)}{16}{subsection.3.3.3}%
+\contentsline {subsection}{\numberline {3.3.4}Backward Propagation From Scratch}{16}{subsection.3.3.4}%
+\contentsline {section}{\numberline {3.4}Ringkasan Temuan}{16}{section.3.4}%
+\contentsline {subsection}{\numberline {3.4.1}CNN Classification}{17}{subsection.3.4.1}%
+\contentsline {subsection}{\numberline {3.4.2}Image Captioning (RNN/LSTM)}{17}{subsection.3.4.2}%
+\contentsline {subsection}{\numberline {3.4.3}Kesimpulan Umum}{17}{subsection.3.4.3}%
+\contentsline {chapter}{\numberline {4}Kesimpulan dan Saran}{18}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Kesimpulan}{18}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Saran}{18}{section.4.2}%
+\contentsline {chapter}{\numberline {5}Pembagian Tugas}{19}{chapter.5}%
+\contentsline {chapter}{Daftar Pustaka}{20}{chapter*.42}%
