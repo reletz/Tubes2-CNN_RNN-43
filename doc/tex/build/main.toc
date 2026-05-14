@@ -1,0 +1,66 @@
+\contentsline {chapter}{\numberline {1}Deskripsi Persoalan}{1}{chapter.1}%
+\contentsline {section}{\numberline {1.1}Latar Belakang}{1}{section.1.1}%
+\contentsline {section}{\numberline {1.2}Tujuan}{1}{section.1.2}%
+\contentsline {section}{\numberline {1.3}Dataset dan Ruang Lingkup}{1}{section.1.3}%
+\contentsline {subsection}{\numberline {1.3.1}Intel Image Classification (CNN)}{2}{subsection.1.3.1}%
+\contentsline {subsection}{\numberline {1.3.2}Flickr8k (RNN/LSTM Captioning)}{2}{subsection.1.3.2}%
+\contentsline {section}{\numberline {1.4}Batasan Implementasi}{2}{section.1.4}%
+\contentsline {chapter}{\numberline {2}Pembahasan}{3}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Penjelasan Implementasi}{3}{section.2.1}%
+\contentsline {subsection}{\numberline {2.1.1}Struktur Proyek}{3}{subsection.2.1.1}%
+\contentsline {subsection}{\numberline {2.1.2}Implementasi CNN}{3}{subsection.2.1.2}%
+\contentsline {subsubsection}{Utility Functions Citra}{3}{section*.4}%
+\contentsline {subsubsection}{Layer CNN From Scratch}{3}{section*.5}%
+\contentsline {subsubsection}{Builder Model CNN}{4}{section*.7}%
+\contentsline {subsection}{\numberline {2.1.3}Implementasi Captioning (RNN/LSTM)}{4}{subsection.2.1.3}%
+\contentsline {subsubsection}{Preprocessing Caption}{4}{section*.8}%
+\contentsline {subsubsection}{Layer RNN/LSTM From Scratch}{4}{section*.9}%
+\contentsline {subsubsection}{Builder Model Captioning}{4}{section*.11}%
+\contentsline {section}{\numberline {2.2}Penjelasan Forward Propagation}{5}{section.2.2}%
+\contentsline {subsection}{\numberline {2.2.1}Forward Propagation CNN}{5}{subsection.2.2.1}%
+\contentsline {subsubsection}{Conv2D (Shared Parameters)}{5}{section*.12}%
+\contentsline {paragraph}{Step-by-step alur CNN (inference).}{5}{section*.13}%
+\contentsline {subsection}{\numberline {2.2.2}Ringkasan Encoder-Decoder}{6}{subsection.2.2.2}%
+\contentsline {subsubsection}{LocallyConnected2D (Non-Shared Parameters)}{6}{section*.16}%
+\contentsline {paragraph}{Step-by-step alur LocallyConnected2D.}{6}{section*.17}%
+\contentsline {subsubsection}{Pooling dan Head}{6}{section*.19}%
+\contentsline {subsubsection}{Dense + Softmax}{7}{section*.20}%
+\contentsline {subsection}{\numberline {2.2.3}Forward Propagation RNN}{7}{subsection.2.2.3}%
+\contentsline {paragraph}{Step-by-step alur encoder CNN $\rightarrow $ decoder RNN $\rightarrow $ softmax.}{7}{section*.21}%
+\contentsline {subsection}{\numberline {2.2.4}Forward Propagation LSTM}{7}{subsection.2.2.4}%
+\contentsline {paragraph}{Step-by-step alur LSTM decoder.}{8}{section*.23}%
+\contentsline {subsection}{\numberline {2.2.5}Diagram Encoder-Decoder}{8}{subsection.2.2.5}%
+\contentsline {section}{\numberline {2.3}Implementasi Bonus}{8}{section.2.3}%
+\contentsline {subsection}{\numberline {2.3.1}Batch Inference}{8}{subsection.2.3.1}%
+\contentsline {subsection}{\numberline {2.3.2}Backward Propagation}{8}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.3}Init-Inject Captioning}{9}{subsection.2.3.3}%
+\contentsline {subsection}{\numberline {2.3.4}Beam Search Decoder}{9}{subsection.2.3.4}%
+\contentsline {subsection}{\numberline {2.3.5}Grad-CAM dan Feature Visualization}{9}{subsection.2.3.5}%
+\contentsline {chapter}{\numberline {3}Hasil Pengujian}{10}{chapter.3}%
+\contentsline {section}{\numberline {3.1}CNN}{10}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Setup Eksperimen}{10}{subsection.3.1.1}%
+\contentsline {subsection}{\numberline {3.1.2}Perbandingan Shared vs Non-Shared Parameter}{10}{subsection.3.1.2}%
+\contentsline {subsection}{\numberline {3.1.3}Pengaruh Jumlah Layer Konvolusi}{10}{subsection.3.1.3}%
+\contentsline {subsection}{\numberline {3.1.4}Pengaruh Banyak Filter per Layer}{11}{subsection.3.1.4}%
+\contentsline {subsection}{\numberline {3.1.5}Pengaruh Ukuran Filter per Layer}{11}{subsection.3.1.5}%
+\contentsline {subsection}{\numberline {3.1.6}Pengaruh Jenis Pooling Layer}{11}{subsection.3.1.6}%
+\contentsline {subsection}{\numberline {3.1.7}Perbandingan Keras vs From Scratch (Arsitektur Terbaik)}{11}{subsection.3.1.7}%
+\contentsline {section}{\numberline {3.2}Simple RNN dan LSTM untuk Image Captioning}{11}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Setup Eksperimen}{11}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Perbandingan Jumlah Layer: RNN}{12}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Perbandingan Jumlah Layer: LSTM}{12}{subsection.3.2.3}%
+\contentsline {subsection}{\numberline {3.2.4}Perbandingan Ukuran Hidden State: RNN dan LSTM}{12}{subsection.3.2.4}%
+\contentsline {subsection}{\numberline {3.2.5}Perbandingan RNN vs LSTM}{12}{subsection.3.2.5}%
+\contentsline {subsection}{\numberline {3.2.6}Perbandingan Keras vs From Scratch}{13}{subsection.3.2.6}%
+\contentsline {subsection}{\numberline {3.2.7}Pengaruh Panjang Maksimum Caption terhadap BLEU-4}{13}{subsection.3.2.7}%
+\contentsline {section}{\numberline {3.3}Hasil Bonus}{13}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Init-Inject vs Pre-Inject}{13}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Greedy vs Beam Search}{13}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.3.3}Visualisasi CNN (Feature Map dan Grad-CAM)}{13}{subsection.3.3.3}%
+\contentsline {subsection}{\numberline {3.3.4}Backward Propagation From Scratch}{13}{subsection.3.3.4}%
+\contentsline {section}{\numberline {3.4}Ringkasan Temuan}{13}{section.3.4}%
+\contentsline {chapter}{\numberline {4}Kesimpulan dan Saran}{14}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Kesimpulan}{14}{section.4.1}%
+\contentsline {section}{\numberline {4.2}Saran}{14}{section.4.2}%
+\contentsline {chapter}{\numberline {5}Pembagian Tugas}{15}{chapter.5}%
+\contentsline {chapter}{Daftar Pustaka}{16}{chapter*.39}%

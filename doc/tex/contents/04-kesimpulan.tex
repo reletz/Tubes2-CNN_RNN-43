@@ -1,0 +1,27 @@
+% !TEX root = ../main.tex
+
+\chapter{Kesimpulan dan Saran}
+
+\section{Kesimpulan}
+
+Berdasarkan implementasi dan eksperimen pada proyek ini, dapat disimpulkan bahwa:
+
+\begin{enumerate}
+    \item Komponen \textit{forward propagation} CNN, SimpleRNN, dan LSTM berhasil diimplementasikan secara modular \textit{from scratch} menggunakan NumPy serta kompatibel dengan bobot Keras melalui \texttt{set\_weights()}.
+    \item Pipeline klasifikasi citra dan image captioning berhasil dibangun dari tahap preprocessing, pelatihan Keras, pemuatan bobot ke model scratch, hingga evaluasi metrik pada data uji.
+    \item Evaluasi CNN menegaskan pentingnya desain arsitektur (jumlah layer, jumlah filter, ukuran kernel, dan jenis pooling) serta menunjukkan trade-off antara performa dan efisiensi parameter pada shared vs non-shared convolution.
+    \item Evaluasi captioning menunjukkan pengaruh signifikan jumlah layer recurrent, ukuran hidden state, dan strategi decoding terhadap kualitas caption, dengan LSTM umumnya lebih stabil untuk dependensi urutan yang lebih panjang.
+    \item Implementasi bonus (batch inference, backward propagation, init-inject, beam search, dan Grad-CAM) memperluas cakupan analisis dan meningkatkan kualitas interpretasi model.
+\end{enumerate}
+
+\section{Saran}
+
+Saran pengembangan untuk pekerjaan selanjutnya adalah sebagai berikut.
+
+\begin{enumerate}
+    \item Menambahkan protokol evaluasi yang lebih kuat (misalnya \textit{multiple seeds} dan analisis statistik) agar kesimpulan performa lebih robust.
+    \item Menjalankan \textit{error analysis} terstruktur pada sampel prediksi gagal, baik untuk klasifikasi maupun captioning, agar perbaikan arsitektur lebih terarah.
+    \item Mengoptimasi performa komputasi melalui vektorisasi tambahan atau akselerasi perangkat keras saat inferensi batch besar.
+    \item Mengembangkan decoder dengan teknik lanjutan (misalnya attention atau length normalization pada beam search) untuk meningkatkan kualitas caption.
+    \item Memperluas dokumentasi eksperimen agar seluruh konfigurasi dan hasil dapat direproduksi dengan lebih mudah.
+\end{enumerate}

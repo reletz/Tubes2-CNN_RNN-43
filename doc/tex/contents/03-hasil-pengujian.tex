@@ -1,0 +1,265 @@
+% !TEX root = ../main.tex
+
+\chapter{Hasil Pengujian}
+
+Bab ini merangkum rancangan eksperimen dan format evaluasi sesuai spesifikasi tugas. Nilai numerik pada tabel diisi dari hasil notebook pelatihan/evaluasi di \texttt{src/notebooks}.
+
+\section{CNN}
+
+\subsection{Setup Eksperimen}
+
+\begin{itemize}
+	\item Dataset: Intel Image Classification (6 kelas).
+	\item Loss: Sparse Categorical Crossentropy.
+	\item Optimizer: Adam.
+	\item Metrik utama: macro F1-score pada split test.
+	\item Komparasi utama: shared vs non-shared parameter dan Keras vs from scratch.
+\end{itemize}
+
+\subsection{Perbandingan Shared vs Non-Shared Parameter}
+
+\begin{table}[H]
+	\centering
+	\caption{Perbandingan Conv2D (Shared) vs LocallyConnected2D (Non-Shared)}
+	\begin{tabular}{lccc}
+		\toprule
+		\textbf{Model} & \textbf{Macro F1 (Test)} & \textbf{Jumlah Parameter} & \textbf{Waktu Inferensi} \\
+		\midrule
+		Conv2D (Keras) & [isi] & [isi] & [isi] \\
+		Conv2D (Scratch) & [isi] & [isi] & [isi] \\
+		LocallyConnected2D (Keras) & [isi] & [isi] & [isi] \\
+		LocallyConnected2D (Scratch) & [isi] & [isi] & [isi] \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:cnn-shared-vs-nonshared}
+\end{table}
+
+\textbf{Analisis.} Jelaskan dampak \textit{parameter sharing} terhadap akurasi, efisiensi parameter, dan biaya komputasi.
+
+\subsection{Pengaruh Jumlah Layer Konvolusi}
+
+\begin{table}[H]
+	\centering
+	\caption{Pengaruh Jumlah Layer Konvolusi}
+	\begin{tabular}{lcc}
+		\toprule
+		\textbf{Variasi} & \textbf{Macro F1 (Test)} & \textbf{Catatan} \\
+		\midrule
+		1 layer konvolusi & [isi] & [isi] \\
+		2 layer konvolusi & [isi] & [isi] \\
+		3 layer konvolusi & [isi] & [isi] \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:cnn-var-depth}
+\end{table}
+
+\subsection{Pengaruh Banyak Filter per Layer}
+
+\begin{table}[H]
+	\centering
+	\caption{Pengaruh Kombinasi Jumlah Filter}
+	\begin{tabular}{lcc}
+		\toprule
+		\textbf{Kombinasi Filter} & \textbf{Macro F1 (Test)} & \textbf{Catatan} \\
+		\midrule
+		Kombinasi A & [isi] & [isi] \\
+		Kombinasi B & [isi] & [isi] \\
+		Kombinasi C & [isi] & [isi] \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:cnn-var-filter-count}
+\end{table}
+
+\subsection{Pengaruh Ukuran Filter per Layer}
+
+\begin{table}[H]
+	\centering
+	\caption{Pengaruh Ukuran Kernel Konvolusi}
+	\begin{tabular}{lcc}
+		\toprule
+		\textbf{Kombinasi Kernel} & \textbf{Macro F1 (Test)} & \textbf{Catatan} \\
+		\midrule
+		Kombinasi A & [isi] & [isi] \\
+		Kombinasi B & [isi] & [isi] \\
+		Kombinasi C & [isi] & [isi] \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:cnn-var-kernel-size}
+\end{table}
+
+\subsection{Pengaruh Jenis Pooling Layer}
+
+\begin{table}[H]
+	\centering
+	\caption{Perbandingan Jenis Pooling}
+	\begin{tabular}{lcc}
+		\toprule
+		\textbf{Pooling} & \textbf{Macro F1 (Test)} & \textbf{Catatan} \\
+		\midrule
+		MaxPooling & [isi] & [isi] \\
+		AvgPooling & [isi] & [isi] \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:cnn-var-pooling}
+\end{table}
+
+\subsection{Perbandingan Keras vs From Scratch (Arsitektur Terbaik)}
+
+\begin{table}[H]
+	\centering
+	\caption{Keras vs From Scratch pada Arsitektur CNN Terbaik}
+	\begin{tabular}{lcc}
+		\toprule
+		\textbf{Implementasi} & \textbf{Macro F1 (Test)} & \textbf{Selisih terhadap Keras} \\
+		\midrule
+		Keras & [isi] & -- \\
+		From Scratch & [isi] & [isi] \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:cnn-keras-vs-scratch}
+\end{table}
+
+\textbf{Grafik wajib.} Sertakan grafik train loss dan validation loss untuk setiap eksperimen utama CNN.
+
+\section{Simple RNN dan LSTM untuk Image Captioning}
+
+\subsection{Setup Eksperimen}
+
+\begin{itemize}
+	\item Dataset: Flickr8k (6000 train, 1000 val, 1000 test).
+	\item Encoder: CNN pretrained (frozen), fitur disimpan \texttt{.npy}.
+	\item Decoder: RNN dan LSTM, dilatih terpisah.
+	\item Loss: Sparse Categorical Crossentropy; optimizer: Adam.
+	\item Metrik: BLEU-4 (utama), METEOR (sekunder), dan waktu eksekusi.
+\end{itemize}
+
+\subsection{Perbandingan Jumlah Layer: RNN}
+
+\begin{table}[H]
+	\centering
+	\caption{Variasi Jumlah Layer Recurrent pada Decoder RNN}
+	\begin{tabular}{lccc}
+		\toprule
+		\textbf{Jumlah Layer} & \textbf{BLEU-4} & \textbf{METEOR} & \textbf{Waktu Inferensi} \\
+		\midrule
+		1 layer & [isi] & [isi] & [isi] \\
+		2 layer & [isi] & [isi] & [isi] \\
+		3 layer & [isi] & [isi] & [isi] \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:rnn-var-depth}
+\end{table}
+
+\subsection{Perbandingan Jumlah Layer: LSTM}
+
+\begin{table}[H]
+	\centering
+	\caption{Variasi Jumlah Layer Recurrent pada Decoder LSTM}
+	\begin{tabular}{lccc}
+		\toprule
+		\textbf{Jumlah Layer} & \textbf{BLEU-4} & \textbf{METEOR} & \textbf{Waktu Inferensi} \\
+		\midrule
+		1 layer & [isi] & [isi] & [isi] \\
+		2 layer & [isi] & [isi] & [isi] \\
+		3 layer & [isi] & [isi] & [isi] \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:lstm-var-depth}
+\end{table}
+
+\subsection{Perbandingan Ukuran Hidden State: RNN dan LSTM}
+
+\begin{table}[H]
+	\centering
+	\caption{Variasi Hidden State pada Decoder RNN/LSTM}
+	\begin{tabular}{lcccc}
+		\toprule
+		\textbf{Decoder} & \textbf{Hidden Units} & \textbf{BLEU-4} & \textbf{METEOR} & \textbf{Waktu Inferensi} \\
+		\midrule
+		RNN & 128 & [isi] & [isi] & [isi] \\
+		RNN & 512 & [isi] & [isi] & [isi] \\
+		LSTM & 128 & [isi] & [isi] & [isi] \\
+		LSTM & 512 & [isi] & [isi] & [isi] \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:rnn-lstm-hidden}
+\end{table}
+
+\subsection{Perbandingan RNN vs LSTM}
+
+\begin{table}[H]
+	\centering
+	\caption{Perbandingan Decoder Terbaik RNN vs LSTM}
+	\begin{tabular}{lccc}
+		\toprule
+		\textbf{Decoder} & \textbf{BLEU-4} & \textbf{METEOR} & \textbf{Waktu Inferensi} \\
+		\midrule
+		RNN (best config) & [isi] & [isi] & [isi] \\
+		LSTM (best config) & [isi] & [isi] & [isi] \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:rnn-vs-lstm}
+\end{table}
+
+\textbf{Analisis kualitatif (minimal 10 contoh).} Sertakan gambar, caption ground truth, prediksi RNN, prediksi LSTM, serta score masing-masing contoh (tinggi/sedang/rendah).
+
+\subsection{Perbandingan Keras vs From Scratch}
+
+\begin{table}[H]
+	\centering
+	\caption{Keras vs From Scratch untuk Decoder Terbaik}
+	\begin{tabular}{lcccc}
+		\toprule
+		\textbf{Decoder} & \textbf{Implementasi} & \textbf{BLEU-4} & \textbf{METEOR} & \textbf{Waktu Inferensi} \\
+		\midrule
+		RNN & Keras & [isi] & [isi] & [isi] \\
+		RNN & Scratch & [isi] & [isi] & [isi] \\
+		LSTM & Keras & [isi] & [isi] & [isi] \\
+		LSTM & Scratch & [isi] & [isi] & [isi] \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:caption-keras-vs-scratch}
+\end{table}
+
+\subsection{Pengaruh Panjang Maksimum Caption terhadap BLEU-4}
+
+\begin{table}[H]
+	\centering
+	\caption{Variasi Panjang Maksimum Caption}
+	\begin{tabular}{lcc}
+		\toprule
+		\textbf{Max Length} & \textbf{BLEU-4} & \textbf{Catatan} \\
+		\midrule
+		Variasi 1 & [isi] & [isi] \\
+		Variasi 2 & [isi] & [isi] \\
+		Variasi 3 & [isi] & [isi] \\
+		\bottomrule
+	\end{tabular}
+	\label{tab:caption-maxlen}
+\end{table}
+
+\section{Hasil Bonus}
+
+\subsection{Init-Inject vs Pre-Inject}
+Bandingkan skor BLEU-4 dan waktu eksekusi antara \textit{pre-inject} (utama) dan \textit{init-inject} (bonus).
+
+\subsection{Greedy vs Beam Search}
+Bandingkan kualitas caption (BLEU-4/METEOR) untuk \textit{greedy decoding} dan \textit{beam search} dengan $k=3$ atau $k=5$.
+
+\subsection{Visualisasi CNN (Feature Map dan Grad-CAM)}
+Sertakan visualisasi feature map intermediate dan overlay Grad-CAM untuk beberapa contoh gambar benar/salah klasifikasi.
+
+\subsection{Backward Propagation From Scratch}
+Ringkas hasil verifikasi numerik atau sanity-check untuk layer yang memiliki \texttt{backward()} (misalnya gradien tidak \textit{NaN}, bentuk tensor konsisten, dan selaras dengan ekspektasi teoretis).
+
+\section{Ringkasan Temuan}
+
+Tuliskan poin-poin temuan utama setelah seluruh tabel dan grafik diisi, mencakup:
+
+\begin{enumerate}
+	\item konfigurasi CNN terbaik dan alasannya,
+	\item konfigurasi captioning terbaik dan alasannya,
+	\item perbedaan perilaku RNN vs LSTM,
+	\item kesenjangan Keras vs from scratch,
+	\item dampak fitur bonus terhadap kualitas hasil.
+\end{enumerate}

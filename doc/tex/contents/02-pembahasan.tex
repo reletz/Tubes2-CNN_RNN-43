@@ -1,0 +1,407 @@
+% !TEX root = ../main.tex
+
+\chapter{Pembahasan}
+
+\section{Penjelasan Implementasi}
+
+Implementasi pada repositori ini mengikuti desain modular berbasis OOP. Setiap layer memiliki metode \texttt{forward()}, beberapa layer memiliki \texttt{backward()}, dan layer yang kompatibel dengan Keras memiliki \texttt{set\_weights()} untuk memuat bobot hasil pelatihan.
+
+\subsection{Struktur Proyek}
+
+Struktur utama proyek sebagai berikut.
+
+\begin{itemize}
+    \item \texttt{src/nn/layers}: implementasi layer \textit{from scratch} (\texttt{conv.py}, \texttt{pooling.py}, \texttt{flatten.py}, \texttt{dense.py}, \texttt{embedding.py}, \texttt{recurrent.py}).
+    \item \texttt{src/nn/models}: perakitan arsitektur tingkat tinggi (\texttt{cnn\_model.py}, \texttt{caption\_model.py}).
+    \item \texttt{src/utils}: utilitas pemrosesan data dan metrik (\texttt{image\_utils.py}, \texttt{text\_utils.py}, \texttt{metrics.py}, \texttt{gradcam.py}).
+    \item \texttt{src/notebooks}: notebook pelatihan Keras dan evaluasi \textit{from scratch}.
+\end{itemize}
+
+\subsection{Implementasi CNN}
+
+\subsubsection{Utility Functions Citra}
+Implementasi utilitas citra berada pada \texttt{src/utils/image\_utils.py}.
+
+\begin{itemize}
+    \item \texttt{load\_image(path, target\_size)}: membuka gambar dengan Pillow, \textit{resize}, konversi ke NumPy, normalisasi ke rentang $[0,1]$.
+    \item \texttt{load\_batch(paths, target\_size)}: memproses sekumpulan path menjadi tensor batch dengan format NHWC.
+    \item \texttt{extract\_features(paths, encoder, ...)}: ekstraksi fitur menggunakan encoder Keras \textit{frozen}, lalu menyimpan hasil ke berkas \texttt{.npy}.
+\end{itemize}
+
+\subsubsection{Layer CNN From Scratch}
+Layer CNN diimplementasikan pada \texttt{src/nn/layers/conv.py}, \texttt{src/nn/layers/pooling.py}, dan \texttt{src/nn/layers/flatten.py}.
+
+\begin{table}[H]
+    \centering
+    \caption{Layer CNN yang Diimplementasikan}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Layer} & \textbf{File} & \textbf{Catatan Implementasi} \\
+        \midrule
+        Conv2D & \texttt{conv.py} & Cross-correlation, bobot Keras: $(k_H,k_W,C_{in},C_{out})$ \\
+        LocallyConnected2D & \texttt{conv.py} & Tanpa parameter sharing \\
+        MaxPool2D / AvgPool2D & \texttt{pooling.py} & Sliding window per channel \\
+        GlobalMax/AvgPooling2D & \texttt{pooling.py} & Reduksi spasial seluruh feature map \\
+        Flatten & \texttt{flatten.py} & NHWC $\rightarrow$ vektor 1D (row-major) \\
+        Dense & \texttt{dense.py} & Layer fully-connected + \texttt{set\_weights()} \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:layer-cnn-impl}
+\end{table}
+
+\subsubsection{Builder Model CNN}
+\texttt{CNNClassifier} pada \texttt{src/nn/models/cnn\_model.py} menyusun blok konvolusi secara sekuensial dengan konfigurasi berikut.
+
+\begin{itemize}
+    \item \texttt{conv\_kind}: \texttt{"conv"} untuk shared parameter, \texttt{"locally"} untuk non-shared parameter.
+    \item \texttt{pool\_kind}: \texttt{"max"} atau \texttt{"avg"}.
+    \item \texttt{head\_kind}: \texttt{"flatten"}, \texttt{"global\_avg"}, atau \texttt{"global\_max"}.
+\end{itemize}
+
+Builder ini juga menyediakan utilitas \textit{visual explainability} melalui aktivasi intermediate dan fungsi \texttt{grad\_cam()}.
+
+\subsection{Implementasi Captioning (RNN/LSTM)}
+
+\subsubsection{Preprocessing Caption}
+Preprocessing caption terdapat pada \texttt{src/utils/text\_utils.py}.
+
+\begin{itemize}
+    \item \texttt{clean\_caption()}: \textit{lowercase}, penghapusan tanda baca, normalisasi spasi.
+    \item \texttt{build\_vocabulary()}: membangun \textit{mapping} token-indeks dengan token khusus \texttt{<pad>}, \texttt{<start>}, \texttt{<end>}, \texttt{<unk>}.
+    \item \texttt{encode\_captions()} dan \texttt{pad\_sequences()}: konversi caption menjadi urutan indeks dengan padding seragam.
+\end{itemize}
+
+\subsubsection{Layer RNN/LSTM From Scratch}
+Implementasi layer urutan waktu berada pada \texttt{src/nn/layers/recurrent.py} dan \texttt{src/nn/layers/embedding.py}.
+
+\begin{table}[H]
+    \centering
+    \caption{Layer Captioning yang Diimplementasikan}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Layer} & \textbf{File} & \textbf{Catatan Implementasi} \\
+        \midrule
+        Embedding & \texttt{embedding.py} & Lookup token ID $\rightarrow$ vektor dense \\
+        SimpleRNNCell & \texttt{recurrent.py} & Bobot Keras: kernel, recurrent\_kernel, bias \\
+        LSTMCell & \texttt{recurrent.py} & Gate order Keras: input, forget, cell, output \\
+        Dense projection & \texttt{caption\_model.py} & Proyeksi fitur gambar ke \textit{embed\_dim} \\
+        Dense output & \texttt{caption\_model.py} & Proyeksi hidden state ke \textit{vocab\_size} \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:layer-caption-impl}
+\end{table}
+
+\subsubsection{Builder Model Captioning}
+\texttt{ImageCaptioner} pada \texttt{src/nn/models/caption\_model.py} merealisasikan skema \textit{pre-inject}:
+
+\begin{enumerate}
+    \item Fitur gambar diproyeksikan ke dimensi embedding (sebagai $x_{-1}$).
+    \item Caption token di-embedding (mulai dari \texttt{<start>}).
+    \item Urutan diproses oleh tumpukan layer RNN/LSTM.
+    \item Tiap \textit{time-step} menghasilkan logits vocabulary melalui \textit{dense output}.
+\end{enumerate}
+
+Implementasi juga memuat varian bonus \texttt{InitInjectCaptioner}, \textit{greedy decoding}, dan \textit{beam search decoding}.
+
+\section{Penjelasan Forward Propagation}
+
+\subsection{Forward Propagation CNN}
+
+\subsubsection{Conv2D (Shared Parameters)}
+Pada konteks klasifikasi Intel Image, forward propagation CNN pada implementasi ini berjalan secara sekuensial dari blok konvolusi hingga probabilitas kelas. Input menggunakan format NHWC,
+$X \in \mathbb{R}^{N \times H \times W \times C_{in}}$, agar konsisten dengan seluruh layer di codebase.
+
+Secara umum, satu blok konvolusi melakukan dua operasi: ekstraksi pola lokal (konvolusi) dan reduksi dimensi spasial (pooling). Blok ini dapat diulang beberapa kali sebelum masuk ke classifier.
+
+Untuk kernel
+$K \in \mathbb{R}^{k_H \times k_W \times C_{in} \times C_{out}}$, keluaran di posisi spasial $(i,j)$ dan kanal keluaran $f$ diberikan oleh:
+
+\begin{equation}
+Y_{n,i,j,f} = \sum_{u=0}^{k_H-1}\sum_{v=0}^{k_W-1}\sum_{c=0}^{C_{in}-1}
+X_{n, i+u, j+v, c} \cdot K_{u,v,c,f} + b_f
+\end{equation}
+
+Implementasi menggunakan \texttt{sliding\_window\_view} dan \texttt{tensordot} agar mendukung inferensi batch.
+
+\paragraph{Step-by-step alur CNN (inference).}
+\begin{enumerate}
+    \item \textbf{Input batch:} gambar di-load dan dinormalisasi ke rentang $[0,1]$ melalui \texttt{load\_image()} / \texttt{load\_batch()}.
+    \item \textbf{Konvolusi:} setiap filter membaca patch lokal, menghitung dot-product, lalu menambahkan bias.
+    \item \textbf{Aktivasi:} keluaran konvolusi dipetakan dengan aktivasi non-linear (misalnya ReLU).
+    \item \textbf{Pooling:} dimensi spasial diperkecil memakai max/average pooling.
+    \item \textbf{Head:} representasi fitur diubah ke vektor (\texttt{Flatten}) atau direduksi global (\texttt{GlobalAvg/MaxPooling2D}).
+    \item \textbf{Dense classifier:} vektor fitur diproyeksikan ke dimensi jumlah kelas.
+    \item \textbf{Softmax:} logits diubah menjadi distribusi probabilitas kelas.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \resizebox{0.98\linewidth}{!}{%
+    \begin{tikzpicture}[node distance=0.8cm and 0.6cm, >=Stealth, every node/.style={font=\small}]
+        \node[draw, rounded corners, fill=blue!10] (in) {Input NHWC};
+        \node[draw, rounded corners, fill=green!10, right=of in] (conv) {Conv2D/LocalConv2D};
+        \node[draw, rounded corners, fill=green!10, right=of conv] (act) {Activation};
+        \node[draw, rounded corners, fill=orange!15, right=of act] (pool) {Max/Avg Pooling};
+        \node[draw, rounded corners, fill=yellow!20, right=of pool] (head) {Flatten/Global Pool};
+        \node[draw, rounded corners, fill=purple!15, right=of head] (dense) {Dense};
+        \node[draw, rounded corners, fill=red!15, right=of dense] (softmax) {Softmax};
+
+        \draw[->] (in) -- (conv);
+        \draw[->] (conv) -- (act);
+        \draw[->] (act) -- (pool);
+        \draw[->] (pool) -- (head);
+        \draw[->] (head) -- (dense);
+        \draw[->] (dense) -- (softmax);
+    \end{tikzpicture}%
+    }
+    \caption{Alur forward propagation CNN dari konvolusi hingga softmax}
+
+    \subsection{Ringkasan Encoder-Decoder}
+
+    Secara ringkas, arsitektur image captioning pada proyek ini terdiri dari dua bagian besar. Encoder CNN bertugas mengubah citra mentah menjadi representasi fitur yang padat, sedangkan decoder RNN atau LSTM bertugas mengubah representasi tersebut menjadi urutan kata.
+
+    Perbedaan utama di antara keduanya ada pada mekanisme pemrosesan urutan. RNN sederhana memanfaatkan hidden state tunggal $h_t$, sedangkan LSTM menambahkan cell state $c_t$ dan gate untuk menjaga informasi jangka panjang. Namun, dari sudut pandang pipeline, keduanya tetap memakai alur yang sama: gambar masuk ke CNN, fitur hasil encoder diproyeksikan ke embedding space, lalu decoder menghasilkan token berikutnya sampai caption selesai.
+
+    \begin{figure}[H]
+        \centering
+        \resizebox{0.96\linewidth}{!}{%
+        \begin{tikzpicture}[node distance=0.75cm and 0.6cm, >=Stealth, every node/.style={font=\small}]
+            \node[draw, rounded corners, fill=blue!10] (raw) {Raw Image};
+            \node[draw, rounded corners, fill=green!15, right=of raw] (cnn) {CNN Encoder};
+            \node[draw, rounded corners, fill=yellow!20, right=of cnn] (feat) {Feature Vector};
+            \node[draw, rounded corners, fill=orange!20, right=of feat] (proj) {Dense Projection};
+
+            \node[draw, rounded corners, fill=purple!15, below left=0.95cm and 0.15cm of proj] (rnn) {RNN Decoder};
+            \node[draw, rounded corners, fill=purple!15, below right=0.95cm and 0.15cm of proj] (lstm) {LSTM Decoder};
+
+            \node[draw, rounded corners, fill=red!15, below=of rnn] (soft1) {Softmax};
+            \node[draw, rounded corners, fill=red!15, below=of lstm] (soft2) {Softmax};
+
+            \node[draw, rounded corners, fill=gray!15, below=1.0cm of proj] (caption) {Generated Caption};
+
+            \draw[->] (raw) -- (cnn);
+            \draw[->] (cnn) -- (feat);
+            \draw[->] (feat) -- (proj);
+            \draw[->] (proj) -- (rnn);
+            \draw[->] (proj) -- (lstm);
+            \draw[->] (rnn) -- (soft1);
+            \draw[->] (lstm) -- (soft2);
+            \draw[->] (soft1) -- (caption);
+            \draw[->] (soft2) -- (caption);
+
+            \draw[->, dashed] (caption.west) to[out=180,in=270] node[left] {token berikutnya} (rnn.south);
+            \draw[->, dashed] (caption.east) to[out=0,in=270] node[right] {token berikutnya} (lstm.south);
+        \end{tikzpicture}%
+        }
+        \caption{Ringkasan gabungan encoder-decoder untuk CNN + RNN/LSTM image captioning}
+        \label{fig:encoder-decoder-summary}
+    \end{figure}
+    \label{fig:cnn-forward-flow}
+\end{figure}
+
+\subsubsection{LocallyConnected2D (Non-Shared Parameters)}
+Berbeda dari \texttt{Conv2D}, bobot untuk tiap lokasi output berbeda. Dengan demikian, untuk setiap lokasi $(i,j)$ terdapat kernel lokal tersendiri. Konsep ini meningkatkan kapasitas model, namun jumlah parameter naik signifikan.
+
+\paragraph{Step-by-step alur LocallyConnected2D.}
+\begin{enumerate}
+    \item Input dibagi menjadi patch lokal seperti pada konvolusi biasa.
+    \item Setiap posisi output memiliki bobot tersendiri, sehingga filter tidak dipakai ulang di lokasi berbeda.
+    \item Patch dan kernel lokal diubah menjadi vektor, lalu dihitung dot-product per posisi.
+    \item Bias lokal ditambahkan sebelum hasil diteruskan ke aktivasi atau pooling berikutnya.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \resizebox{0.88\linewidth}{!}{%
+    \begin{tikzpicture}[node distance=1.0cm and 0.9cm, >=Stealth, every node/.style={font=\small}]
+        \node[draw, rounded corners, fill=blue!10] (input) {Feature Map Input};
+        \node[draw, rounded corners, fill=orange!15, right=of input] (patches) {Local Patches};
+        \node[draw, rounded corners, fill=green!15, right=of patches] (kernels) {Independent Kernels per Position};
+        \node[draw, rounded corners, fill=purple!15, right=of kernels] (out) {Output Feature Map};
+
+        \draw[->] (input) -- (patches);
+        \draw[->] (patches) -- (kernels);
+        \draw[->] (kernels) -- (out);
+
+        \node[below=0.22cm of patches, font=\scriptsize, align=center] {tiap lokasi output\\memiliki patch sendiri};
+        \node[below=0.22cm of kernels, font=\scriptsize, align=center] {bobot tidak dibagi\\antar lokasi};
+    \end{tikzpicture}%
+    }
+    \caption{Ilustrasi LocallyConnected2D tanpa parameter sharing}
+    \label{fig:locally-connected-diagram}
+\end{figure}
+
+\subsubsection{Pooling dan Head}
+\begin{itemize}
+    \item \texttt{MaxPool2D}: mengambil nilai maksimum tiap jendela.
+    \item \texttt{AvgPool2D}: mengambil rata-rata tiap jendela.
+    \item \texttt{GlobalPooling}: reduksi seluruh dimensi spasial menjadi satu nilai per kanal.
+    \item \texttt{Flatten}: reshape NHWC menjadi fitur vektor 2D untuk \textit{dense classifier}.
+\end{itemize}
+
+\subsubsection{Dense + Softmax}
+Lapisan keluaran CNN menggunakan transformasi linear:
+\begin{equation}
+z = hW + b
+\end{equation}
+dan probabilitas kelas dihitung dengan:
+\begin{equation}
+\hat{y}_k = \frac{e^{z_k}}{\sum_j e^{z_j}}
+\end{equation}
+
+\subsection{Forward Propagation RNN}
+
+Pada task image captioning, decoder RNN menggunakan skema \textit{pre-inject}. Artinya, fitur gambar dari encoder CNN (Keras, \textit{frozen}) terlebih dahulu diproyeksikan ke \textit{embedding space}, lalu diposisikan sebagai token semu pada waktu $t=-1$.
+
+Untuk input embedding $x_t$ pada waktu ke-$t$, \texttt{SimpleRNNCell} menghitung:
+\begin{equation}
+h_t = \tanh(x_t W_x + h_{t-1} W_h + b)
+\end{equation}
+Logits vocabulary diperoleh dari:
+\begin{equation}
+o_t = h_t W_o + b_o
+\end{equation}
+
+Pada skema \textit{pre-inject}, urutan input menjadi:
+\begin{equation}
+[x_{-1}, x_0, x_1, \ldots, x_{T-1}]
+\end{equation}
+dengan $x_{-1}$ adalah hasil proyeksi fitur gambar.
+
+\paragraph{Step-by-step alur encoder CNN $\rightarrow$ decoder RNN $\rightarrow$ softmax.}
+\begin{enumerate}
+    \item \textbf{Ekstraksi fitur visual:} gambar diproses encoder CNN pretrained untuk menghasilkan feature vector.
+    \item \textbf{Dense projection:} feature vector diproyeksikan ke \textit{embed\_dim} untuk membentuk $x_{-1}$.
+    \item \textbf{Token embedding:} caption input (diawali \texttt{<start>}) diubah menjadi embedding $x_0, x_1, ...$.
+    \item \textbf{Recurrent update:} untuk setiap waktu $t$, state $h_t$ dihitung dari $x_t$ dan $h_{t-1}$.
+    \item \textbf{Output projection:} state terakhir pada setiap step diproyeksikan ke dimensi vocabulary.
+    \item \textbf{Softmax:} logits diubah menjadi probabilitas kata berikutnya.
+    \item \textbf{Decoding:} token dipilih dengan \textit{greedy} atau \textit{beam search}, kemudian diiterasi sampai token \texttt{<end>} atau mencapai \textit{max length}.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \resizebox{0.98\linewidth}{!}{%
+    \begin{tikzpicture}[node distance=0.8cm and 0.5cm, >=Stealth, every node/.style={font=\small}]
+        \node[draw, rounded corners, fill=blue!10] (img) {Raw Image};
+        \node[draw, rounded corners, fill=green!10, right=of img] (enc) {CNN Encoder (Frozen)};
+        \node[draw, rounded corners, fill=yellow!20, right=of enc] (proj) {Dense Projection ($x_{-1}$)};
+        \node[draw, rounded corners, fill=orange!20, right=of proj] (emb) {Token Embedding};
+        \node[draw, rounded corners, fill=purple!15, right=of emb] (rnn) {SimpleRNN};
+        \node[draw, rounded corners, fill=purple!25, right=of rnn] (denseo) {Dense Output};
+        \node[draw, rounded corners, fill=red!15, right=of denseo] (soft) {Softmax};
+
+        \draw[->] (img) -- (enc);
+        \draw[->] (enc) -- (proj);
+        \draw[->] (proj) -- (emb);
+        \draw[->] (emb) -- (rnn);
+        \draw[->] (rnn) -- (denseo);
+        \draw[->] (denseo) -- (soft);
+    \end{tikzpicture}%
+    }
+    \caption{Alur forward propagation captioning dengan decoder RNN (dari CNN encoder hingga softmax)}
+    \label{fig:rnn-forward-flow}
+\end{figure}
+
+\subsection{Forward Propagation LSTM}
+
+Forward propagation LSTM mengikuti alur yang sama dengan RNN pada level pipeline (encoder CNN $\rightarrow$ projection $\rightarrow$ decoder $\rightarrow$ softmax), tetapi mekanisme recurrent-nya lebih kaya karena menyimpan dua state: hidden state $h_t$ dan cell state $c_t$.
+
+\texttt{LSTMCell} menggunakan empat gerbang:
+\begin{align}
+i_t &= \sigma(x_t W_i + h_{t-1} U_i + b_i) \\
+f_t &= \sigma(x_t W_f + h_{t-1} U_f + b_f) \\
+\tilde{c}_t &= \tanh(x_t W_c + h_{t-1} U_c + b_c) \\
+o_t &= \sigma(x_t W_o + h_{t-1} U_o + b_o)
+\end{align}
+
+Pembaruan memori dan hidden state:
+\begin{align}
+c_t &= f_t \odot c_{t-1} + i_t \odot \tilde{c}_t \\
+h_t &= o_t \odot \tanh(c_t)
+\end{align}
+
+Formulasi ini memungkinkan retensi informasi jangka panjang lebih baik daripada RNN sederhana, khususnya pada caption yang lebih panjang.
+
+\paragraph{Step-by-step alur LSTM decoder.}
+\begin{enumerate}
+    \item \textbf{Inisialisasi state:} $h_0$ dan $c_0$ diinisialisasi nol.
+    \item \textbf{Input sequence:} urutan dimulai dari fitur gambar terproyeksi ($x_{-1}$), lalu embedding token caption.
+    \item \textbf{Forget gate ($f_t$):} menentukan proporsi informasi lama $c_{t-1}$ yang dipertahankan.
+    \item \textbf{Input gate ($i_t$) dan kandidat memori ($\tilde{c}_t$):} menentukan informasi baru yang ditulis ke memori.
+    \item \textbf{Update memori ($c_t$):} menggabungkan memori lama dan kandidat memori baru.
+    \item \textbf{Output gate ($o_t$):} menentukan bagian memori yang diekspos menjadi hidden state $h_t$.
+    \item \textbf{Dense + Softmax:} hidden state diproyeksikan ke vocabulary untuk prediksi token berikutnya.
+\end{enumerate}
+
+\begin{figure}[H]
+    \centering
+    \resizebox{0.98\linewidth}{!}{%
+    \begin{tikzpicture}[node distance=0.8cm and 0.5cm, >=Stealth, every node/.style={font=\small}]
+        \node[draw, rounded corners, fill=blue!10] (img2) {Raw Image};
+        \node[draw, rounded corners, fill=green!10, right=of img2] (enc2) {CNN Encoder (Frozen)};
+        \node[draw, rounded corners, fill=yellow!20, right=of enc2] (proj2) {Dense Projection ($x_{-1}$)};
+        \node[draw, rounded corners, fill=orange!20, right=of proj2] (emb2) {Token Embedding};
+        \node[draw, rounded corners, fill=purple!15, right=of emb2] (lstm) {LSTM Cell(s)};
+        \node[draw, rounded corners, fill=purple!25, right=of lstm] (dense2) {Dense Output};
+        \node[draw, rounded corners, fill=red!15, right=of dense2] (soft2) {Softmax};
+
+        \draw[->] (img2) -- (enc2);
+        \draw[->] (enc2) -- (proj2);
+        \draw[->] (proj2) -- (emb2);
+        \draw[->] (emb2) -- (lstm);
+        \draw[->] (lstm) -- (dense2);
+        \draw[->] (dense2) -- (soft2);
+
+        \draw[->, dashed, bend left=35] (lstm.north) to node[above] {$h_{t-1}, c_{t-1}$} (lstm.north east);
+    \end{tikzpicture}%
+    }
+    \caption{Alur forward propagation captioning dengan decoder LSTM (dari CNN encoder hingga softmax)}
+    \label{fig:lstm-forward-flow}
+\end{figure}
+
+\subsection{Diagram Encoder-Decoder}
+Secara konseptual, arsitektur captioning yang dipakai mengikuti pola encoder-decoder. Encoder CNN menghasilkan representasi visual ringkas, sedangkan decoder RNN/LSTM memetakan representasi tersebut menjadi urutan kata.
+
+\begin{figure}[H]
+    \centering
+    \resizebox{0.98\linewidth}{!}{%
+    \begin{tikzpicture}[node distance=0.9cm and 0.7cm, >=Stealth, every node/.style={font=\small}]
+        \node[draw, rounded corners, fill=blue!10] (image) {Input Image};
+        \node[draw, rounded corners, fill=green!15, right=of image] (cnnenc) {CNN Encoder};
+        \node[draw, rounded corners, fill=yellow!20, right=of cnnenc] (feature) {Feature Vector};
+        \node[draw, rounded corners, fill=orange!20, right=of feature] (denseproj) {Dense Projection};
+        \node[draw, rounded corners, fill=purple!15, right=of denseproj] (decoder) {RNN / LSTM Decoder};
+        \node[draw, rounded corners, fill=red!15, right=of decoder] (softmax2) {Softmax};
+        \node[draw, rounded corners, fill=gray!15, below=of decoder] (caption) {Generated Caption};
+
+        \draw[->] (image) -- (cnnenc);
+        \draw[->] (cnnenc) -- (feature);
+        \draw[->] (feature) -- (denseproj);
+        \draw[->] (denseproj) -- (decoder);
+        \draw[->] (decoder) -- (softmax2);
+        \draw[->] (softmax2) -- (caption);
+
+        \draw[->, dashed] (caption.west) to[out=180,in=260] node[left] {token berikutnya} (decoder.south);
+    \end{tikzpicture}%
+    }
+    \caption{Diagram encoder-decoder untuk image captioning dengan skema pre-inject}
+    \label{fig:encoder-decoder-diagram}
+\end{figure}
+
+\section{Implementasi Bonus}
+
+\subsection{Batch Inference}
+Seluruh layer utama dirancang menerima dimensi batch. Contoh: \texttt{Conv2D.forward()} menerima format NHWC dengan sumbu pertama sebagai batch.
+
+\subsection{Backward Propagation}
+Implementasi \texttt{backward()} tersedia pada beberapa layer kritikal, termasuk \texttt{Conv2D}, \texttt{MaxPool2D}, \texttt{AvgPool2D}, \texttt{GlobalPooling}, \texttt{Dense}, dan \texttt{LSTMCell}.
+
+\subsection{Init-Inject Captioning}
+Varian \texttt{InitInjectCaptioner} menggabungkan konteks gambar dengan hidden representation caption menggunakan mode \texttt{add} atau \texttt{concat}.
+
+\subsection{Beam Search Decoder}
+Selain \textit{greedy decoding}, disediakan \textit{beam search} dengan lebar beam terkontrol (misalnya $k=3$ atau $k=5$) untuk meningkatkan kualitas urutan caption.
+
+\subsection{Grad-CAM dan Feature Visualization}
+\texttt{CNNClassifier} menyimpan aktivasi intermediate untuk visualisasi feature map, serta menyediakan utilitas \textit{Grad-CAM} untuk menandai area gambar yang berkontribusi kuat terhadap prediksi.

@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.4.17)  1 MAY 2026 20:43
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.4.17)  14 MAY 2026 02:29
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -904,7 +904,7 @@ Package hyperref Info: Link coloring ON on input line 14.
 \openout4 = `main.out'.
 
 \c@lstlisting=\count432
-<images/cover.png, id=7, 690.58pt x 1003.75pt>
+<images/cover.png, id=216, 690.58pt x 1003.75pt>
 File: images/cover.png Graphic file (type png)
 <use images/cover.png>
 Package pdftex.def Info: images/cover.png  used on input line 26.
@@ -918,33 +918,110 @@ LaTeX Font Info:    Trying to load font information for U+msb on input line 32.
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 ) [1
 
-{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc} <./images/cover.png>] (build/main.toc)
+{/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}{/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc} <./images/cover.png>] (build/main.toc [1
+
+])
 \tf@toc=\write5
 \openout5 = `main.toc'.
 
- [1
+ [2] (./contents/01-pendahuluan.tex
+Bab 1.
 
-] (./contents/01-pendahuluan.tex) (./contents/02-pembahasan.tex) (./contents/03-hasil-pengujian.tex) (./contents/04-kesimpulan.tex) (./contents/05-pembagian-tugas.tex) (./contents/06-referensi.tex) (build/main.aux)
+Overfull \hbox (6.70804pt too wide) in paragraph at lines 19--20
+[]\T1/cmr/m/n/10 Mengevaluasi dampak vari-asi ar-sitek-tur dan de-cod-ing strat-egy (\T1/cmr/m/it/10 pre-inject/init-inject\T1/cmr/m/n/10 , \T1/cmr/m/it/10 greedy/beam search\T1/cmr/m/n/10 )
+ []
+
+
+pdfTeX warning (ext4): destination with the same identifier (name{page.1}) has been already used, duplicate ignored
+<to be read again> 
+                   \relax 
+l.44 \end{table}
+                 [1
+
+]) (./contents/02-pembahasan.tex [2]
+Bab 2.
+
+Overfull \hbox (26.73586pt too wide) in paragraph at lines 7--8
+\T1/cmtt/m/n/10 forward()\T1/cmr/m/n/10 , be-ber-apa layer memi-liki \T1/cmtt/m/n/10 backward()\T1/cmr/m/n/10 , dan layer yang kom-pat-i-bel den-gan Keras memi-liki \T1/cmtt/m/n/10 set_weights()
+ []
+
+
+Overfull \hbox (79.3608pt too wide) in paragraph at lines 32--33
+\T1/cmr/m/n/10 Layer CNN di-im-ple-men-tasikan pada \T1/cmtt/m/n/10 src/nn/layers/conv.py\T1/cmr/m/n/10 , \T1/cmtt/m/n/10 src/nn/layers/pooling.py\T1/cmr/m/n/10 , dan \T1/cmtt/m/n/10 src/nn/layers/flatten.py\T1/cmr/m/n/10 . 
+ []
+
+[3
+
+{/usr/share/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}]
+Overfull \hbox (3.44838pt too wide) in paragraph at lines 61--62
+[]\T1/cmr/m/n/10 Builder ini juga menye-di-akan util-i-tas \T1/cmr/m/it/10 vi-sual ex-plain-abil-ity \T1/cmr/m/n/10 melalui ak-ti-vasi in-ter-me-di-ate dan fungsi \T1/cmtt/m/n/10 grad_cam()\T1/cmr/m/n/10 . 
+ []
+
+
+Overfull \hbox (23.76436pt too wide) in paragraph at lines 75--76
+\T1/cmr/m/n/10 Implementasi layer uru-tan waktu be-rada pada \T1/cmtt/m/n/10 src/nn/layers/recurrent.py \T1/cmr/m/n/10 dan \T1/cmtt/m/n/10 src/nn/layers/embedding.py\T1/cmr/m/n/10 . 
+ []
+
+[4]
+Overfull \hbox (4.32875pt too wide) in paragraph at lines 128--129
+[]\T1/cmr/bx/n/10 Input batch: \T1/cmr/m/n/10 gam-bar di-load dan di-nor-mal-isasi ke rentang $\OT1/cmr/m/n/10 [0\OML/cmm/m/it/10 ; \OT1/cmr/m/n/10 1]$ \T1/cmr/m/n/10 melalui \T1/cmtt/m/n/10 load_image() \T1/cmr/m/n/10 / \T1/cmtt/m/n/10 load_batch()\T1/cmr/m/n/10 . 
+ []
+
+[5] [6] [7] [8]) (./contents/03-hasil-pengujian.tex [9]
+Bab 3.
+[10
+
+] [11] [12]) (./contents/04-kesimpulan.tex [13]
+Bab 4.
+) (./contents/05-pembagian-tugas.tex [14
+
+]
+Bab 5.
+) (./contents/06-referensi.tex [15
+
+]
+Overfull \hbox (26.35127pt too wide) in paragraph at lines 15--16
+[]\T1/cmr/m/n/10 Stanford CS231n. \T1/cmr/m/it/10 Con-vo-lu-tional Neu-ral Net-works\T1/cmr/m/n/10 . [][]$\T1/cmtt/m/n/10 https : / / cs231n . github . io / convolutional-[]networks/$[][] 
+ []
+
+
+Overfull \hbox (32.70528pt too wide) in paragraph at lines 21--22
+[]\T1/cmr/m/n/10 TensorFlow Tu-to-rial. \T1/cmr/m/it/10 Im-age cap-tion-ing\T1/cmr/m/n/10 . [][]$\T1/cmtt/m/n/10 https : / / www . tensorflow . org / tutorials / text / image _ captioning$[][] 
+ []
+
+
+Overfull \hbox (104.87111pt too wide) in paragraph at lines 23--24
+[]\T1/cmr/m/n/10 Kaggle. \T1/cmr/m/it/10 In-tel Im-age Clas-si-fi-ca-tion Dataset\T1/cmr/m/n/10 . [][]$\T1/cmtt/m/n/10 https : / / www . kaggle . com / datasets / puneet6060 / intel-[]image-[]classification$[][] 
+ []
+
+
+Overfull \hbox (13.93443pt too wide) in paragraph at lines 29--30
+[]\T1/cmr/m/n/10 NLTK Doc-u-men-ta-tion. \T1/cmr/m/it/10 BLEU and ME-TEOR eval-u-a-tion\T1/cmr/m/n/10 . [][]$\T1/cmtt/m/n/10 https : / / www . nltk . org / api / nltk . translate .
+ []
+
+) [16
+
+] (build/main.aux)
  ***********
 LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: D41D8CD98F00B204E9800998ECF8427E;0.
+(rerunfilecheck)             Checksum: A99B090A272A3053FA0EC62414A45153;9676.
  ) 
 Here is how much of TeX's memory you used:
- 38314 strings out of 469515
- 788581 string characters out of 5470807
- 1339974 words of memory out of 5000000
- 66409 multiletter control sequences out of 15000+600000
- 639912 words of font info for 68 fonts, out of 8000000 for 9000
+ 39051 strings out of 469515
+ 800688 string characters out of 5470807
+ 1357973 words of memory out of 5000000
+ 66950 multiletter control sequences out of 15000+600000
+ 648350 words of font info for 90 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 89i,6n,97p,911b,533s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</usr/share/texmf-dist/fonts/type1/public/cm-super/sfbi2074.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx2074.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx2488.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfss1440.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfti1200.pfb>
-Output written on build/main.pdf (2 pages, 1650647 bytes).
+ 89i,13n,97p,911b,1038s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbi2074.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx1000.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx2074.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx2488.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm0700.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm0900.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfss1440.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfti1000.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfti1200.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sftt1000.pfb>
+Output written on build/main.pdf (19 pages, 2019489 bytes).
 PDF statistics:
- 60 PDF objects out of 1000 (max. 8388607)
- 39 compressed objects within 1 object stream
- 4 named destinations out of 1000 (max. 500000)
- 18 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 667 PDF objects out of 1000 (max. 8388607)
+ 583 compressed objects within 6 object streams
+ 185 named destinations out of 1000 (max. 500000)
+ 434 words of extra memory for PDF output out of 10000 (max. 10000000)
 

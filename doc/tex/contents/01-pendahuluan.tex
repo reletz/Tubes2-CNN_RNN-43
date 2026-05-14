@@ -1,0 +1,76 @@
+% !TEX root = ../main.tex
+
+\chapter{Deskripsi Persoalan}
+
+\section{Latar Belakang}
+Tugas besar ini membahas implementasi \textit{Convolutional Neural Network} (CNN), \textit{Simple Recurrent Neural Network} (RNN), dan \textit{Long Short-Term Memory} (LSTM) untuk dua konteks yang berbeda: klasifikasi citra dan \textit{image captioning}. Berbeda dengan pendekatan \textit{end-to-end} menggunakan framework, pada tugas ini komponen \textit{forward propagation} utama diimplementasikan \textit{from scratch} menggunakan NumPy, kemudian diverifikasi menggunakan bobot hasil pelatihan model Keras.
+
+Pendekatan ini dipilih agar proses inferensi tidak diperlakukan sebagai \textit{black box}. Untuk CNN, implementasi menekankan perbedaan antara parameter \textit{shared} (\texttt{Conv2D}) dan non-\textit{shared} (\texttt{LocallyConnected2D}). Untuk captioning, implementasi menekankan perilaku urutan waktu pada decoder RNN/LSTM dengan skema \textit{pre-inject} (fitur gambar diinjeksi sebagai $x_{-1}$) sesuai \textit{Show and Tell}.
+
+Selain implementasi inti, proyek ini juga mengevaluasi beberapa komponen bonus yang relevan secara praktis, yaitu \textit{batch inference}, \textit{backward propagation} layer tertentu, \textit{beam search decoder}, \textit{init-inject} captioning, serta visualisasi \textit{Grad-CAM}.
+
+\section{Tujuan}
+Secara umum, tugas ini bertujuan mengembangkan pipeline \textit{deep learning} yang modular dan dapat dianalisis secara transparan. Secara spesifik, tujuan yang ingin dicapai adalah:
+
+\begin{enumerate}
+    \item Mengimplementasikan layer CNN, RNN, dan LSTM \textit{from scratch} untuk kebutuhan inferensi serta kompatibel dengan bobot Keras melalui metode \texttt{set\_weights()}.
+    \item Membandingkan performa \textit{Keras vs from scratch} pada tugas klasifikasi citra (macro F1) dan captioning (BLEU-4, METEOR, waktu eksekusi).
+    \item Menganalisis pengaruh hyperparameter utama terhadap kinerja model pada kedua domain tugas.
+    \item Mengevaluasi dampak variasi arsitektur dan decoding strategy (\textit{pre-inject/init-inject}, \textit{greedy/beam search}) terhadap kualitas caption.
+\end{enumerate}
+
+\section{Dataset dan Ruang Lingkup}
+Proyek menggunakan dua dataset yang berbeda sesuai spesifikasi tugas.
+
+\subsection{Intel Image Classification (CNN)}
+Dataset Intel Image Classification berisi sekitar 25.000 gambar dengan 6 kelas:
+\textit{buildings, forest, glacier, mountain, sea, street}. Split \textit{train}, \textit{validation}, dan \textit{test} menggunakan pembagian yang telah disediakan dataset.
+
+\begin{table}[H]
+    \centering
+    \caption{Ringkasan Task CNN}
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Komponen} & \textbf{Spesifikasi} \\
+        \midrule
+        Task & Klasifikasi citra multi-kelas (6 kelas) \\
+        Arsitektur utama & Conv2D / LocallyConnected2D + Pooling + Head + Dense \\
+        Loss & Sparse Categorical Crossentropy \\
+        Optimizer (Keras) & Adam \\
+        Metrik evaluasi utama & Macro F1-score \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:ringkasan-cnn}
+\end{table}
+
+\subsection{Flickr8k (RNN/LSTM Captioning)}
+Dataset Flickr8k berisi 8.092 gambar, masing-masing dengan 5 caption. Pembagian data yang digunakan: 6.000 \textit{train}, 1.000 \textit{validation}, dan 1.000 \textit{test}. Pipeline captioning menggunakan encoder CNN \textit{frozen} dan decoder RNN/LSTM.
+
+\begin{table}[H]
+    \centering
+    \caption{Ringkasan Task Captioning}
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Komponen} & \textbf{Spesifikasi} \\
+        \midrule
+        Task & Generasi caption gambar \\
+        Arsitektur acuan & Show and Tell (\textit{pre-inject}) \\
+        Decoder & SimpleRNN dan LSTM (dilatih terpisah) \\
+        Loss & Sparse Categorical Crossentropy \\
+        Optimizer (Keras) & Adam \\
+        Metrik utama & BLEU-4 \\
+        Metrik sekunder & METEOR, waktu eksekusi \\
+        \bottomrule
+    \end{tabular}
+    \label{tab:ringkasan-caption}
+\end{table}
+
+\section{Batasan Implementasi}
+Beberapa batasan yang digunakan agar konsisten dengan ketentuan tugas adalah sebagai berikut.
+
+\begin{enumerate}
+    \item Implementasi \textit{from scratch} untuk \textit{forward/backward} layer dilakukan menggunakan NumPy.
+    \item Pelatihan model utama dilakukan di Keras, kemudian bobot dimuat ke implementasi \textit{scratch}.
+    \item Encoder CNN pada tugas captioning digunakan dalam kondisi \textit{frozen}.
+    \item Eksperimen dilakukan secara modular sehingga setiap variasi arsitektur/hyperparameter dapat dibandingkan secara adil.
+\end{enumerate}
