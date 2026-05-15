@@ -211,10 +211,11 @@ class LocallyConnected2D:
 
         # normalize kernel shape to (out_h, out_w, k_flat, filters)
         kernel = self.kernel
-        if kernel.ndim == 6 and kernel.shape[:2] == (out_h, out_w):
+        if kernel.size == out_h * out_w * k_flat * self.filters:
             kernel_flat = kernel.reshape(out_h, out_w, k_flat, self.filters)
-        elif kernel.ndim == 3 and kernel.shape[0] == out_h * out_w:
-            kernel_flat = kernel.reshape(out_h, out_w, k_flat, self.filters)
+        elif kernel.size == k_flat * self.filters:
+            kernel_shared_flat = kernel.reshape(k_flat, self.filters)
+            kernel_flat = np.broadcast_to(kernel_shared_flat, (out_h, out_w, k_flat, self.filters))
         else:
             kernel_flat = np.asarray(kernel)
             try:
@@ -230,10 +231,10 @@ class LocallyConnected2D:
                 raise ValueError("bias is expected but not set")
 
             b = self.bias
-            if b.ndim == 2 and b.shape[0] == out_h * out_w:
+            if b.size == out_h * out_w * self.filters:
                 b = b.reshape(out_h, out_w, self.filters)
-            elif b.ndim == 3 and b.shape[:2] == (out_h, out_w):
-                b = b
+            elif b.size == self.filters:
+                b = np.broadcast_to(b.reshape(self.filters), (out_h, out_w, self.filters))
             else:
                 try:
                     b = b.reshape(out_h, out_w, self.filters)
