@@ -316,6 +316,10 @@ class CNNClassifier:
 			class_index: The target class used for the map.
 			probabilities: Model output probabilities for the input.
 		"""
+		# Helper: safely convert cupy/numpy array to numpy
+		def _to_np(arr):
+			return arr.get() if hasattr(arr, 'get') else np.asarray(arr, dtype=np.float32)
+
 		x = np.asarray(x, dtype=np.float32)
 		if x.ndim == 3:
 			x = x[None, ...]
@@ -325,8 +329,9 @@ class CNNClassifier:
 		probabilities = self.forward(x)
 		target_class = int(np.argmax(probabilities[0])) if class_index is None else int(class_index)
 
-		last_conv_activations = self.intermediate_activations[-1][0]
-		gradients = self._backprop_to_last_conv(target_class)[0]
+		# Convert cached activations to numpy
+		last_conv_activations = _to_np(self.intermediate_activations[-1][0])
+		gradients = _to_np(self._backprop_to_last_conv(target_class)[0])
 		weights = gradients.mean(axis=(0, 1))
 		heatmap = np.sum(last_conv_activations * weights[None, None, :], axis=-1)
 		heatmap = np.maximum(heatmap, 0.0)
