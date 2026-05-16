@@ -4,14 +4,14 @@
 
 \section{Kesimpulan}
 
-Berdasarkan implementasi dan eksperimen pada proyek ini, dapat disimpulkan bahwa:
+Berdasarkan implementasi dan hasil eksperimen dari \textit{notebook} pengujian, dapat disimpulkan bahwa:
 
 \begin{enumerate}
-    \item Komponen \textit{forward propagation} CNN, SimpleRNN, dan LSTM berhasil diimplementasikan secara modular \textit{from scratch} menggunakan NumPy serta kompatibel dengan bobot Keras melalui \texttt{set\_weights()}.
-    \item Pipeline klasifikasi citra dan image captioning berhasil dibangun dari tahap preprocessing, pelatihan Keras, pemuatan bobot ke model scratch, hingga evaluasi metrik pada data uji.
-    \item Evaluasi CNN menegaskan pentingnya desain arsitektur (jumlah layer, jumlah filter, ukuran kernel, dan jenis pooling) serta menunjukkan trade-off antara performa dan efisiensi parameter pada shared vs non-shared convolution.
-    \item Evaluasi captioning menunjukkan pengaruh signifikan jumlah layer recurrent, ukuran hidden state, dan strategi decoding terhadap kualitas caption, dengan LSTM umumnya lebih stabil untuk dependensi urutan yang lebih panjang.
-    \item Implementasi bonus (batch inference, backward propagation, init-inject, beam search, dan Grad-CAM) memperluas cakupan analisis dan meningkatkan kualitas interpretasi model.
+    \item \textbf{Implementasi Scratch}: Komponen \textit{forward propagation} CNN, SimpleRNN, dan LSTM berhasil diimplementasikan secara modular menggunakan NumPy. Hasil inferensi klasifikasi citra menunjukkan bahwa implementasi manual (\textit{from scratch}) jauh lebih cepat secara komputasi ($\approx 1,39$ detik berbanding 9,01 detik untuk Keras), meskipun presisi evaluasi akhir lebih rendah dibandingkan Keras dikarenakan limitasi dan perbedaan mendetail pada struktur graf komputasi Keras.
+    \item \textbf{Arsitektur CNN}: Pengujian klasifikasi citra mengonfirmasi bahwa penggunaan \textit{parameter sharing} (\texttt{Conv2D}) sangat efisien dengan 142.406 parameter, dibandingkan \texttt{LocallyConnected2D} yang melonjak hingga 29.662.278 parameter dan rentan memicu \textit{overfitting}. Lebih lanjut, model dengan 3 \textit{layer} konvolusi lebih unggul (Macro F1: 0.7852) daripada 2 \textit{layer} (0.7557), serta variasi kernel berukuran 3x3 dan penggunaan \textit{Max Pooling} secara konsisten menyajikan kualitas fitur yang lebih baik untuk dataset yang digunakan.
+    \item \textbf{Arsitektur RNN/LSTM}: Pada sistem \textit{image captioning}, \textbf{LSTM secara signifikan mengungguli SimpleRNN}, khususnya ketika jaringan diperdalam. Model RNN cenderung kehilangan akurasi drastis (BLEU-4 mendekati 0.001) pada arsitektur 3 \textit{layer} akibat persoalan \textit{vanishing gradient}. Di sisi lain, LSTM mampu mempertahankan kualitas teks (BLEU-4 0.019) karena adanya \textit{cell state} yang menangkap informasi jangka panjang.
+    \item \textbf{Generasi Teks}: Proses dekoding bahasa lebih optimal pada batasan prediksi 10 kata. Evaluasi dengan panjang (\textit{Max Length}) 20 hingga 30 kata justru mengakibatkan penurunan skor BLEU-4 secara sistematis akibat kecenderungan dekoding secara \textit{greedy} untuk mengulangi frasa generik.
+    \item \textbf{Hasil Bonus}: Komponen visualisasi \textbf{Grad-CAM} berhasil dipadukan untuk memberikan \textit{visual explainability} atas fitur-fitur kritis yang mempengaruhi hasil konvolusi. Adapun eksperimen perluasan model lainnya (metode \textit{Init-Inject} dan fungsi \textit{Beam Search}) tidak diinisialisasi dalam pengerjaan saat ini.
 \end{enumerate}
 
 \section{Saran}
@@ -19,9 +19,7 @@ Berdasarkan implementasi dan eksperimen pada proyek ini, dapat disimpulkan bahwa
 Saran pengembangan untuk pekerjaan selanjutnya adalah sebagai berikut.
 
 \begin{enumerate}
-    \item Menambahkan protokol evaluasi yang lebih kuat (misalnya \textit{multiple seeds} dan analisis statistik) agar kesimpulan performa lebih robust.
-    \item Menjalankan \textit{error analysis} terstruktur pada sampel prediksi gagal, baik untuk klasifikasi maupun captioning, agar perbaikan arsitektur lebih terarah.
-    \item Mengoptimasi performa komputasi melalui vektorisasi tambahan atau akselerasi perangkat keras saat inferensi batch besar.
-    \item Mengembangkan decoder dengan teknik lanjutan (misalnya attention atau length normalization pada beam search) untuk meningkatkan kualitas caption.
-    \item Memperluas dokumentasi eksperimen agar seluruh konfigurasi dan hasil dapat direproduksi dengan lebih mudah.
+    \item \textbf{Eksplorasi Metode Dekoding}: Menghidupkan dan menyetel fungsionalitas \textit{Beam Search Decoder} untuk menginvestigasi sejauh mana peningkatan variasi narasi jika dipadankan dengan metode standar \textit{Greedy}.
+    \item \textbf{Optimalisasi Memori Komputasi}: Merancang paralelisasi perhitungan matriks lebih efektif untuk metode \textit{non-shared parameter} sehingga implementasi \textit{scratch} bisa menyamai waktu \textit{inferencing} model Keras dalam komputasi beban tinggi.
+    \item \textbf{Pengujian Kombinasi Multimodal}: Mengeksekusi secara komprehensif kapabilitas \textit{Init-Inject Captioner} untuk memberikan wawasan lebih luas mengenai bagaimana penempatan fitur injeksi berinteraksi dengan memori LSTM.
 \end{enumerate}
