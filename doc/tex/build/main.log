@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.4.17)  14 MAY 2026 23:15
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.4.17)  16 MAY 2026 20:34
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -904,7 +904,7 @@ Package hyperref Info: Link coloring ON on input line 14.
 \openout4 = `main.out'.
 
 \c@lstlisting=\count432
-<images/cover.png, id=228, 690.58pt x 1003.75pt>
+<images/cover.png, id=216, 690.58pt x 1003.75pt>
 File: images/cover.png Graphic file (type png)
 <use images/cover.png>
 Package pdftex.def Info: images/cover.png  used on input line 26.
@@ -981,15 +981,32 @@ Overfull \hbox (45.67567pt too wide) in paragraph at lines 456--458
 
 [9]) (./contents/03-hasil-pengujian.tex [10]
 Bab 3.
+
+Overfull \hbox (89.72047pt too wide) in paragraph at lines 5--6
+\T1/cmr/m/n/10 diek-straksi dari proses pelati-han dan eval-u-asi yang di-doku-men-tasikan pada note-book \T1/cmtt/m/n/10 src/notebooks/notebook-rnn-lstm.ipynb\T1/cmr/m/n/10 . 
+ []
+
 [11
 
-] [12] [13] [14] [15] [16]) (./contents/04-kesimpulan.tex [17]
+] [12] [13]
+<images/rnn-lstm/loss-graph.png, id=542, 1193.45876pt x 491.8375pt>
+File: images/rnn-lstm/loss-graph.png Graphic file (type png)
+<use images/rnn-lstm/loss-graph.png>
+Package pdftex.def Info: images/rnn-lstm/loss-graph.png  used on input line 204.
+(pdftex.def)             Requested size: 424.82523pt x 175.07257pt.
+ [14] [15 <./images/rnn-lstm/loss-graph.png (PNG copy)>]
+<images/rnn-lstm/10-example.png, id=557, 1781.65625pt x 2499.3375pt>
+File: images/rnn-lstm/10-example.png Graphic file (type png)
+<use images/rnn-lstm/10-example.png>
+Package pdftex.def Info: images/rnn-lstm/10-example.png  used on input line 269.
+(pdftex.def)             Requested size: 448.42822pt x 629.06602pt.
+ [16] [17 <./images/rnn-lstm/10-example.png (PNG copy)>] [18]) (./contents/04-kesimpulan.tex [19]
 Bab 4.
-) (./contents/05-pembagian-tugas.tex [18
+) (./contents/05-pembagian-tugas.tex [20
 
 ]
 Bab 5.
-) (./contents/06-referensi.tex [19
+) (./contents/06-referensi.tex [21
 
 ]
 Overfull \hbox (26.35127pt too wide) in paragraph at lines 15--16
@@ -1011,7 +1028,7 @@ Overfull \hbox (13.93443pt too wide) in paragraph at lines 29--30
 []\T1/cmr/m/n/10 NLTK Doc-u-men-ta-tion. \T1/cmr/m/it/10 BLEU and ME-TEOR eval-u-a-tion\T1/cmr/m/n/10 . [][]$\T1/cmtt/m/n/10 https : / / www . nltk . org / api / nltk . translate .
  []
 
-) [20
+) [22
 
 ] (build/main.aux)
  ***********
@@ -1019,21 +1036,21 @@ LaTeX2e <2025-11-01>
 L3 programming layer <2026-01-19>
  ***********
 Package rerunfilecheck Info: File `main.out' has not changed.
-(rerunfilecheck)             Checksum: 707BDF32513A19A7990F9104AA79A4D4;10203.
+(rerunfilecheck)             Checksum: 229BC16F1272DA64D8E05C62EC6E9D7A;9646.
  ) 
 Here is how much of TeX's memory you used:
- 39663 strings out of 469515
- 806915 string characters out of 5470807
- 1846619 words of memory out of 5000000
- 67443 multiletter control sequences out of 15000+600000
+ 39648 strings out of 469515
+ 807104 string characters out of 5470807
+ 1846346 words of memory out of 5000000
+ 67448 multiletter control sequences out of 15000+600000
  649429 words of font info for 92 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 89i,13n,97p,911b,2087s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 89i,13n,97p,995b,2087s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi5.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbi2074.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx1000.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx1200.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx1440.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx2074.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfbx2488.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm0500.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm0700.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm0900.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfrm1200.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfss1440.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfti1000.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sfti1200.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sftt0900.pfb></usr/share/texmf-dist/fonts/type1/public/cm-super/sftt1000.pfb>
-Output written on build/main.pdf (23 pages, 2103810 bytes).
+Output written on build/main.pdf (25 pages, 6042245 bytes).
 PDF statistics:
- 841 PDF objects out of 1000 (max. 8388607)
- 747 compressed objects within 8 object streams
- 299 named destinations out of 1000 (max. 500000)
- 458 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 816 PDF objects out of 1000 (max. 8388607)
+ 718 compressed objects within 8 object streams
+ 279 named destinations out of 1000 (max. 500000)
+ 444 words of extra memory for PDF output out of 10000 (max. 10000000)
 
