@@ -287,18 +287,39 @@ class CNNClassifier:
 		if self.output_layer.weights is None:
 			raise ValueError("Output weights are not set")
 
-		logits = self.output_layer.z_cache
+		# Helper: safely convert cupy or numpy array to numpy
+		def _to_np(arr):
+			if arr is None: return None
+			return arr.get() if hasattr(arr, 'get') else np.asarray(arr, dtype=np.float32)
+
+		logits = _to_np(self.output_layer.z_cache)
 		if logits is None:
 			raise ValueError("Grad-CAM requires output-layer caches from forward()")
+
+		# Ensure all cached tensors in output_layer are on CPU
+		self.output_layer.z_cache = logits
+		self.output_layer.weights = _to_np(self.output_layer.weights)
+		self.output_layer.biases = _to_np(self.output_layer.biases)
+		if self.output_layer.input_cache is not None:
+			self.output_layer.input_cache = _to_np(self.output_layer.input_cache)
 
 		grad_logits = np.zeros_like(logits, dtype=np.float32)
 		grad_logits[:, int(class_index)] = 1.0
 
 		grad = grad_logits @ self.output_layer.weights.T
+
+		# Ensure head_layer (Flatten) cache is on CPU before backward
+		if hasattr(self.head_layer, '_input_cache') and self.head_layer._input_cache is not None:
+			self.head_layer._input_cache = _to_np(self.head_layer._input_cache)
 		grad = self.head_layer.backward(grad)
 
 		last_pool = self.pool_layers[-1]
 		if last_pool is not None:
+			# Ensure pool cache is on CPU before backward
+			if hasattr(last_pool, '_input_cache') and last_pool._input_cache is not None:
+				last_pool._input_cache = _to_np(last_pool._input_cache)
+			if hasattr(last_pool, '_output_cache') and last_pool._output_cache is not None:
+				last_pool._output_cache = _to_np(last_pool._output_cache)
 			grad = last_pool.backward(grad)
 
 		return grad
