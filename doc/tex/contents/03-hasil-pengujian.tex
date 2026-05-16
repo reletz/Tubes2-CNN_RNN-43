@@ -23,16 +23,23 @@ Subbab ini menganalisis fundamental dari operasi konvolusi, yaitu \textit{spatia
 		\toprule
 		\textbf{Model} & \textbf{Macro F1 (Test)} & \textbf{Jumlah Parameter} & \textbf{Waktu Inferensi} \\
 		\midrule
-		Conv2D (Keras) & [isi] & [isi] & [isi] \\
-		Conv2D (Scratch) & [isi] & [isi] & [isi] \\
-		LocallyConnected2D (Keras) & [isi] & [isi] & [isi] \\
-		LocallyConnected2D (Scratch) & [isi] & [isi] & [isi] \\
+		Conv2D (Keras) & 0.8039 & 142.406 & 9,01 s \\
+		Conv2D (Scratch) & 0.4371 & 142.406 & 1,39 s \\
+		LocallyConnected2D (Keras) & 0.6507 & 29.662.278 & N/A \\
+		LocallyConnected2D (Scratch) & 0.4371 & 29.662.278 & 6,18 s \\
 		\bottomrule
 	\end{tabular}
 	\label{tab:cnn-shared-vs-nonshared}
 \end{table}
 
 Penggunaan \textit{parameter sharing} pada \texttt{Conv2D} memungkinkan model untuk mendeteksi fitur seperti tepi atau tekstur secara universal di mana pun fitur tersebut muncul dalam gambar, sekaligus mereduksi jumlah parameter secara drastis. Sebaliknya, \texttt{LocallyConnected2D} memiliki kapasitas yang sangat tinggi namun sangat rentan terhadap \textit{overfitting} karena membutuhkan data yang jauh lebih besar untuk melatih parameter unik di setiap posisi spasial, serta memiliki beban memori yang jauh lebih berat.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.9\textwidth]{images/cnn/plot_1.png}
+	\caption{Kurva Training dan Validation Loss untuk Arsitektur LocallyConnected2D (Non-Shared)}
+	\label{fig:cnn-nonshared-loss}
+\end{figure}
 
 \subsection{Pengaruh Jumlah Layer Konvolusi}
 
@@ -45,9 +52,8 @@ Kedalaman jaringan (\textit{depth}) diuji untuk memahami bagaimana representasi 
 		\toprule
 		\textbf{Variasi} & \textbf{Macro F1 (Test)} & \textbf{Catatan} \\
 		\midrule
-		1 layer konvolusi & [isi] & [isi] \\
-		2 layer konvolusi & [isi] & [isi] \\
-		3 layer konvolusi & [isi] & [isi] \\
+		2 layer konvolusi & 0.7557 & Rata-rata dari 8 variasi \\
+		3 layer konvolusi & 0.7852 & Rata-rata dari 8 variasi \\
 		\bottomrule
 	\end{tabular}
 	\label{tab:cnn-var-depth}
@@ -66,9 +72,8 @@ Jumlah filter menentukan lebar (\textit{width}) dari jaringan saraf. Eksperimen 
 		\toprule
 		\textbf{Kombinasi Filter} & \textbf{Macro F1 (Test)} & \textbf{Catatan} \\
 		\midrule
-		Kombinasi A & [isi] & [isi] \\
-		Kombinasi B & [isi] & [isi] \\
-		Kombinasi C & [isi] & [isi] \\
+		Kombinasi Dasar & 0.7690 & Rata-rata (hingga 64 filter) \\
+		Kombinasi Lebar & 0.7720 & Rata-rata (hingga 128 filter) \\
 		\bottomrule
 	\end{tabular}
 	\label{tab:cnn-var-filter-count}
@@ -87,9 +92,8 @@ Ukuran kernel menentukan area lokal yang dilihat oleh model pada satu waktu, ata
 		\toprule
 		\textbf{Kombinasi Kernel} & \textbf{Macro F1 (Test)} & \textbf{Catatan} \\
 		\midrule
-		Kombinasi A & [isi] & [isi] \\
-		Kombinasi B & [isi] & [isi] \\
-		Kombinasi C & [isi] & [isi] \\
+		Kernel (3, 3) & 0.7786 & Rata-rata dari 8 variasi \\
+		Kernel (5, 5) & 0.7624 & Rata-rata dari 8 variasi \\
 		\bottomrule
 	\end{tabular}
 	\label{tab:cnn-var-kernel-size}
@@ -108,14 +112,23 @@ Pooling digunakan untuk mereduksi dimensi spasial dan memberikan toleransi terha
 		\toprule
 		\textbf{Pooling} & \textbf{Macro F1 (Test)} & \textbf{Catatan} \\
 		\midrule
-		MaxPooling & [isi] & [isi] \\
-		AvgPooling & [isi] & [isi] \\
+		MaxPooling & 0.7711 & Rata-rata dari 8 variasi \\
+		AvgPooling & 0.7699 & Rata-rata dari 8 variasi \\
 		\bottomrule
 	\end{tabular}
 	\label{tab:cnn-var-pooling}
 \end{table}
 
 Operasi \textit{Max Pooling} bekerja dengan mengambil fitur paling dominan dalam suatu jendela spasial, yang seringkali sangat berguna untuk klasifikasi citra yang mengandalkan kontras tekstur. Sementara itu, \textit{Average Pooling} memberikan hasil yang lebih halus namun berisiko melarutkan atau mengaburkan fitur-fitur penting yang hanya muncul secara sporadis.
+
+Untuk melengkapi analisis terkait pemilihan \textit{hyperparameter} (layer, filter, kernel, dan pooling), Gambar \ref{fig:cnn-16-vars} berikut ini menampilkan seluruh grafik proses pelatihan terhadap data latih dan validasi untuk ke-16 variasi arsitektur CNN yang diujikan.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{images/cnn/plot_0.png}
+	\caption{Kurva Pelatihan (\textit{Training \& Validation Loss/Accuracy}) untuk 16 Variasi Arsitektur CNN}
+	\label{fig:cnn-16-vars}
+\end{figure}
 
 \subsection{Perbandingan Keras vs From Scratch (Arsitektur Terbaik)}
 
@@ -128,8 +141,8 @@ Validasi akhir dilakukan untuk memastikan bahwa implementasi manual memiliki pre
 		\toprule
 		\textbf{Implementasi} & \textbf{Macro F1 (Test)} & \textbf{Selisih terhadap Keras} \\
 		\midrule
-		Keras & [isi] & -- \\
-		From Scratch & [isi] & [isi] \\
+		Keras & 0.8039 & -- \\
+		From Scratch & 0.4371 & -0.3668 \\
 		\bottomrule
 	\end{tabular}
 	\label{tab:cnn-keras-vs-scratch}
@@ -296,13 +309,24 @@ Ditemukan bahwa panjang maksimum 10 kata memberikan skor BLEU-4 yang paling opti
 
 \section{Hasil Bonus}
 
+\subsection{Visualisasi Grad-CAM}
+
+Sebagai bagian dari eksperimen bonus, teknik \textit{Gradient-weighted Class Activation Mapping} (Grad-CAM) diimplementasikan untuk memberikan penjelasan visual (\textit{visual explainability}) terkait area pada gambar yang paling mempengaruhi prediksi akhir dari CNN. Gambar \ref{fig:cnn-gradcam} menampilkan contoh \textit{heatmap} aktivasi yang dioverlay pada gambar asli, di mana area dengan warna yang lebih hangat (\textit{merah/kuning}) menunjukkan lokalisasi fitur visual terpenting yang dipelajari oleh filter konvolusi.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.8\textwidth]{images/cnn/plot_2.png}
+	\caption{Contoh Visualisasi Grad-CAM pada Prediksi Klasifikasi CNN}
+	\label{fig:cnn-gradcam}
+\end{figure}
+
 \subsection{Init-Inject vs Pre-Inject}
 
-[Bagian ini akan diisi jika data bonus tersedia di notebook].
+Eksperimen komparasi skema \textit{Init-Inject} dan \textit{Pre-Inject} tidak dilakukan dalam notebook pengujian saat ini, sehingga analisis perbandingan performa belum dapat disajikan.
 
 \subsection{Greedy vs Beam Search}
 
-[Bagian ini akan diisi jika data bonus tersedia di notebook].
+Eksperimen komparasi algoritma dekoding \textit{Greedy} dan \textit{Beam Search} tidak dilakukan dalam notebook pengujian saat ini. Evaluasi utama masih menggunakan dekoding \textit{Greedy}.
 
 \section{Ringkasan Temuan}
 
