@@ -1,5 +1,11 @@
 import numpy as np
 
+def get_xp(x):
+    if type(x).__module__ == 'cupy':
+        import cupy as cp
+        return cp
+    return np
+
 # NB: upstream = hasil chain derivation
 
 class Activation:
@@ -37,8 +43,9 @@ class Linear(Activation):
 class ReLU(Activation):
     """Rectified Linear Unit"""
     def forward(self, x): # no negative
+        xp = get_xp(x)
         self.input = x
-        self.output = np.maximum(0, x)
+        self.output = xp.maximum(0, x)
         return self.output
     
     def backward(self, upstream_grad):
@@ -47,8 +54,9 @@ class ReLU(Activation):
 
 class Sigmoid(Activation):
     def forward(self, x):
+        xp = get_xp(x)
         self.input = x
-        self.output = 1 / (1 + np.exp(-x))
+        self.output = 1 / (1 + xp.exp(-x))
         return self.output
     
     def backward(self, upstream_grad):
@@ -57,8 +65,9 @@ class Sigmoid(Activation):
 class Tanh(Activation):
     """Hyperbolic tangent"""
     def forward(self, x):
+        xp = get_xp(x)
         self.input = x
-        self.output = np.tanh(x)
+        self.output = xp.tanh(x)
         return self.output
     
     def backward(self, upstream_grad): # 1 - tanh^2
@@ -72,57 +81,52 @@ class Softmax(Activation):
         softmax behaviour: hasilnya ga berubah kalau semua input dikurangin konstanta yang sama.
         implementasi: kurangin sama angka terbesar, baru kalkulasi outputnya
         """
-        shifted = x - np.max(x, axis=1, keepdims=True)
-        exp_x = np.exp(shifted)
-        self.output = exp_x / np.sum(exp_x, axis=1, keepdims=True)
+        xp = get_xp(x)
+        shifted = x - xp.max(x, axis=1, keepdims=True)
+        exp_x = xp.exp(shifted)
+        self.output = exp_x / xp.sum(exp_x, axis=1, keepdims=True)
         self.input = x
         return self.output
     
     def backward(self, upstream_grad):
         """Use softmax Jacobian"""
+        xp = get_xp(upstream_grad)
         s = self.output
         ds = upstream_grad * s
-        grad_input = ds - s * np.sum(ds, axis=1, keepdims=True)
+        grad_input = ds - s * xp.sum(ds, axis=1, keepdims=True)
         return grad_input
 
 # Bonus
 
 class LeakyReLU(Activation):
-    """Leaky Rectified Linear Unit.
-    
-    f(x) = x if x > 0, else alpha * x (default alpha=0.01)
-    Derivative: 1 if x > 0, else alpha
-    """
+    """Leaky Rectified Linear Unit."""
     def __init__(self, alpha=0.01):
         self.alpha = alpha
     
     def forward(self, x):
+        xp = get_xp(x)
         self.input = x
-        self.output = np.maximum(x, 0) + self.alpha * np.minimum(x, 0)
+        self.output = xp.maximum(x, 0) + self.alpha * xp.minimum(x, 0)
         return self.output
     
     def backward(self, upstream_grad):
-        """Gradient: 1 if x > 0, else alpha"""
         mask = (self.input > 0).astype(float)
         return upstream_grad * (mask + self.alpha * (1 - mask))
     
 class ELU(Activation):
-    """Exponential Linear Unit.
-    
-    f(x) = x if x > 0, else alpha * (exp(x) - 1) (default alpha=1.0)
-    Derivative: 1 if x > 0, else alpha * exp(x)
-    """
+    """Exponential Linear Unit."""
     def __init__(self, alpha=1.0):
         self.alpha = alpha
     
     def forward(self, x):
+        xp = get_xp(x)
         self.input = x
-        self.output = np.where(x > 0, x, self.alpha * (np.exp(x) - 1))
+        self.output = xp.where(x > 0, x, self.alpha * (xp.exp(x) - 1))
         return self.output
     
     def backward(self, upstream_grad):
-        """Gradient: 1 if x > 0, else alpha * exp(x)"""
-        exp_x = np.exp(self.input)
+        xp = get_xp(upstream_grad)
+        exp_x = xp.exp(self.input)
         mask = (self.input > 0).astype(float)
         return upstream_grad * (mask + self.alpha * exp_x * (1 - mask))
     
