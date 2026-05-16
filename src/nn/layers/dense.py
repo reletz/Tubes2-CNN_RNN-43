@@ -21,6 +21,12 @@ except ImportError:  # pragma: no cover – fallback for direct file loading in 
 
 import numpy as np
 
+def get_xp(x):
+    if type(x).__module__ == 'cupy':
+        import cupy as cp
+        return cp
+    return np
+
 class Layer:
     def __init__(
             self,
@@ -47,12 +53,13 @@ class Layer:
         if self.input_cache is None:
             raise ValueError("Layer.backward() called before forward().")
 
+        xp = get_xp(grad_output)
         batch_size = self.input_cache.shape[0]
 
         dz = self.activation.backward(grad_output)
 
         self.weight_gradients = self.input_cache.T @ dz / batch_size
-        self.bias_gradients = np.mean(dz, axis=0, keepdims=True)
+        self.bias_gradients = xp.mean(dz, axis=0, keepdims=True)
 
         return dz @ self.weights.T
     

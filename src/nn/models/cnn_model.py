@@ -212,23 +212,54 @@ class CNNClassifier:
 		"""Set weights for the final classifier layer."""
 		self.output_layer.set_weights(weights, biases.reshape(1, -1))
 
-	def forward(self, x: np.ndarray) -> np.ndarray:
+	def _transfer_weights(self, xp) -> None:
+		"""Dynamically transfer weights to target device (numpy or cupy).
+		Handles both directions: numpy->cupy (GPU) and cupy->numpy (CPU).
+		"""
+		def _to(arr, xp):
+			if arr is None:
+				return None
+			if xp is np:
+				return arr.get() if hasattr(arr, 'get') else np.asarray(arr)
+			else:
+				return xp.asarray(arr)
+
+		for layer in self.conv_layers:
+			if layer.kernel is not None:
+				layer.kernel = _to(layer.kernel, xp)
+			if getattr(layer, 'bias', None) is not None:
+				layer.bias = _to(layer.bias, xp)
+		
+		self.output_layer.weights = _to(self.output_layer.weights, xp)
+		self.output_layer.biases = _to(self.output_layer.biases, xp)
+
+	def forward(self, x: np.ndarray, use_gpu: bool = False) -> np.ndarray:
 		"""Forward pass.
 
 		Args:
 			x: Input image batch in NHWC format `(N, H, W, C)` or a single
 			   image `(H, W, C)`.
+			use_gpu: If True, executes purely on GPU via CuPy if available, and returns a Numpy array to maintain spec compliance.
 
 		Returns:
 			Class probabilities with shape `(N, num_classes)`.
 		"""
-		x = np.asarray(x, dtype=np.float32)
-		if x.ndim == 3:
-			x = x[None, ...]
-		if x.ndim != 4:
-			raise ValueError(f"Expected input shape (N,H,W,C) or (H,W,C), got {x.shape}")
+		xp = np
+		if use_gpu:
+			try:
+				import cupy as xp
+			except ImportError:
+				pass
+		
+		self._transfer_weights(xp)
+		
+		x_xp = xp.asarray(x, dtype=xp.float32)
+		if x_xp.ndim == 3:
+			x_xp = x_xp[None, ...]
+		if x_xp.ndim != 4:
+			raise ValueError(f"Expected input shape (N,H,W,C) or (H,W,C), got {x_xp.shape}")
 
-		out = x
+		out = x_xp
 		self.intermediate_activations = []
 		for conv_layer, pool_layer in zip(self.conv_layers, self.pool_layers):
 			out = conv_layer.forward(out)
@@ -238,11 +269,17 @@ class CNNClassifier:
 
 		out = self.head_layer.forward(out)
 		out = self.output_layer.forward(out)
+		
+		if xp is not np:
+			# Convert intermediate activations back to CPU for Grad-CAM
+			self.intermediate_activations = [xp.asnumpy(act) for act in self.intermediate_activations]
+			return xp.asnumpy(out)
+			
 		return out
 
-	def predict(self, x: np.ndarray) -> np.ndarray:
+	def predict(self, x: np.ndarray, use_gpu: bool = False) -> np.ndarray:
 		"""Alias for forward()."""
-		return self.forward(x)
+		return self.forward(x, use_gpu=use_gpu)
 
 	def _backprop_to_last_conv(self, class_index: int) -> np.ndarray:
 		if not self.intermediate_activations:
@@ -250,18 +287,39 @@ class CNNClassifier:
 		if self.output_layer.weights is None:
 			raise ValueError("Output weights are not set")
 
-		logits = self.output_layer.z_cache
+		# Helper: safely convert cupy or numpy array to numpy
+		def _to_np(arr):
+			if arr is None: return None
+			return arr.get() if hasattr(arr, 'get') else np.asarray(arr, dtype=np.float32)
+
+		logits = _to_np(self.output_layer.z_cache)
 		if logits is None:
 			raise ValueError("Grad-CAM requires output-layer caches from forward()")
+
+		# Ensure all cached tensors in output_layer are on CPU
+		self.output_layer.z_cache = logits
+		self.output_layer.weights = _to_np(self.output_layer.weights)
+		self.output_layer.biases = _to_np(self.output_layer.biases)
+		if self.output_layer.input_cache is not None:
+			self.output_layer.input_cache = _to_np(self.output_layer.input_cache)
 
 		grad_logits = np.zeros_like(logits, dtype=np.float32)
 		grad_logits[:, int(class_index)] = 1.0
 
 		grad = grad_logits @ self.output_layer.weights.T
+
+		# Ensure head_layer (Flatten) cache is on CPU before backward
+		if hasattr(self.head_layer, '_input_cache') and self.head_layer._input_cache is not None:
+			self.head_layer._input_cache = _to_np(self.head_layer._input_cache)
 		grad = self.head_layer.backward(grad)
 
 		last_pool = self.pool_layers[-1]
 		if last_pool is not None:
+			# Ensure pool cache is on CPU before backward
+			if hasattr(last_pool, '_input_cache') and last_pool._input_cache is not None:
+				last_pool._input_cache = _to_np(last_pool._input_cache)
+			if hasattr(last_pool, '_output_cache') and last_pool._output_cache is not None:
+				last_pool._output_cache = _to_np(last_pool._output_cache)
 			grad = last_pool.backward(grad)
 
 		return grad
@@ -279,6 +337,10 @@ class CNNClassifier:
 			class_index: The target class used for the map.
 			probabilities: Model output probabilities for the input.
 		"""
+		# Helper: safely convert cupy/numpy array to numpy
+		def _to_np(arr):
+			return arr.get() if hasattr(arr, 'get') else np.asarray(arr, dtype=np.float32)
+
 		x = np.asarray(x, dtype=np.float32)
 		if x.ndim == 3:
 			x = x[None, ...]
@@ -288,8 +350,9 @@ class CNNClassifier:
 		probabilities = self.forward(x)
 		target_class = int(np.argmax(probabilities[0])) if class_index is None else int(class_index)
 
-		last_conv_activations = self.intermediate_activations[-1][0]
-		gradients = self._backprop_to_last_conv(target_class)[0]
+		# Convert cached activations to numpy
+		last_conv_activations = _to_np(self.intermediate_activations[-1][0])
+		gradients = _to_np(self._backprop_to_last_conv(target_class)[0])
 		weights = gradients.mean(axis=(0, 1))
 		heatmap = np.sum(last_conv_activations * weights[None, None, :], axis=-1)
 		heatmap = np.maximum(heatmap, 0.0)

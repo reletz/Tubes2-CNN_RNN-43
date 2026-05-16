@@ -3,11 +3,24 @@ from __future__ import annotations
 from typing import Iterable, Tuple
 
 import numpy as np
-from numpy.lib.stride_tricks import sliding_window_view
+
+def get_xp(x):
+    if type(x).__module__ == 'cupy':
+        import cupy as cp
+        return cp
+    return np
+
+def _sliding_window_view(x, window_shape, axis, xp):
+    if xp is np:
+        from numpy.lib.stride_tricks import sliding_window_view
+        return sliding_window_view(x, window_shape, axis)
+    else:
+        from cupy.lib.stride_tricks import sliding_window_view
+        return sliding_window_view(x, window_shape, axis)
 
 
-def _compute_padding(in_size: int, kernel: int, stride: int) -> Tuple[int, int]:
-    out_size = int(np.ceil(in_size / stride))
+def _compute_padding(in_size: int, kernel: int, stride: int, xp=np) -> Tuple[int, int]:
+    out_size = int(xp.ceil(in_size / stride))
     pad_needed = max(0, (out_size - 1) * stride + kernel - in_size)
     pad_before = pad_needed // 2
     pad_after = pad_needed - pad_before
@@ -54,7 +67,9 @@ class Conv2D:
         if self.kernel is None:
             raise ValueError("Conv2D weights are not set. Call set_weights() first.")
 
-        self._input_cache = np.asarray(x)
+        xp = get_xp(x)
+        self._input_cache = x
+
         N, H, W, C = x.shape
         kH, kW, Ck, out_filters = self.kernel.shape
         if Ck != C:
@@ -63,9 +78,9 @@ class Conv2D:
         stride_h, stride_w = self.strides
 
         if self.padding == "same":
-            pad_h = _compute_padding(H, kH, stride_h)
-            pad_w = _compute_padding(W, kW, stride_w)
-            x_padded = np.pad(x, ((0, 0), pad_h, pad_w, (0, 0)), mode="constant")
+            pad_h = _compute_padding(H, kH, stride_h, xp)
+            pad_w = _compute_padding(W, kW, stride_w, xp)
+            x_padded = xp.pad(x, ((0, 0), pad_h, pad_w, (0, 0)), mode="constant")
         elif self.padding == "valid":
             pad_h = (0, 0)
             pad_w = (0, 0)
@@ -73,7 +88,7 @@ class Conv2D:
         else:
             raise ValueError("padding must be 'valid' or 'same'")
 
-        self._padded_input_cache = np.asarray(x_padded)
+        self._padded_input_cache = x_padded
         self._pad_h = pad_h
         self._pad_w = pad_w
 
@@ -81,17 +96,14 @@ class Conv2D:
         out_h = (H_p - kH) // stride_h + 1
         out_w = (W_p - kW) // stride_w + 1
 
-        # extract patches: shape (N, out_h, out_w, kH, kW, C)
-        windows = sliding_window_view(x_padded, window_shape=(kH, kW, C), axis=(1, 2, 3))
-        # sliding_window_view with three axes creates shape (N, H_p-kH+1, W_p-kW+1, kH, kW, C)
+        windows = _sliding_window_view(x_padded, window_shape=(kH, kW, C), axis=(1, 2, 3), xp=xp)
         windows = windows[:, ::stride_h, ::stride_w, ...]
 
         k_flat = kH * kW * C
         patches = windows.reshape(N, out_h, out_w, k_flat)
         kernel_flat = self.kernel.reshape(k_flat, out_filters)
 
-        # perform batched matmul: (N,out_h,out_w,k_flat) @ (k_flat, out_filters) -> (N,out_h,out_w,out_filters)
-        out = np.tensordot(patches, kernel_flat, axes=([3], [0]))
+        out = xp.tensordot(patches, kernel_flat, axes=([3], [0]))
 
         if self.use_bias:
             if self.bias is None:
@@ -108,7 +120,8 @@ class Conv2D:
         if self._padded_input_cache is None or self._output_shape is None:
             raise ValueError("Conv2D.backward() called before forward().")
 
-        grad_output = np.asarray(grad_output, dtype=np.float32)
+        xp = get_xp(grad_output)
+        
         if grad_output.shape != self._output_shape:
             raise ValueError(f"Expected grad_output shape {self._output_shape}, got {grad_output.shape}")
 
@@ -120,8 +133,8 @@ class Conv2D:
         k_flat = kH * kW * C
 
         kernel_flat = self.kernel.reshape(k_flat, out_filters)
-        grad_kernel_flat = np.zeros_like(kernel_flat, dtype=np.float32)
-        grad_input_padded = np.zeros_like(x_padded, dtype=np.float32)
+        grad_kernel_flat = xp.zeros_like(kernel_flat, dtype=xp.float32)
+        grad_input_padded = xp.zeros_like(x_padded, dtype=xp.float32)
 
         for out_i in range(out_h):
             h_start = out_i * stride_h
@@ -187,14 +200,15 @@ class LocallyConnected2D:
         if self.kernel is None:
             raise ValueError("LocallyConnected2D weights not set. Call set_weights() first.")
 
+        xp = get_xp(x)
         N, H, W, C = x.shape
         kH, kW = self.kernel_size
         stride_h, stride_w = self.strides
 
         if self.padding == "same":
-            pad_h = _compute_padding(H, kH, stride_h)
-            pad_w = _compute_padding(W, kW, stride_w)
-            x_padded = np.pad(x, ((0, 0), pad_h, pad_w, (0, 0)), mode="constant")
+            pad_h = _compute_padding(H, kH, stride_h, xp)
+            pad_w = _compute_padding(W, kW, stride_w, xp)
+            x_padded = xp.pad(x, ((0, 0), pad_h, pad_w, (0, 0)), mode="constant")
         elif self.padding == "valid":
             x_padded = x
         else:
@@ -204,27 +218,28 @@ class LocallyConnected2D:
         out_h = (H_p - kH) // stride_h + 1
         out_w = (W_p - kW) // stride_w + 1
 
-        windows = sliding_window_view(x_padded, window_shape=(kH, kW, C), axis=(1, 2, 3))
+        windows = _sliding_window_view(x_padded, window_shape=(kH, kW, C), axis=(1, 2, 3), xp=xp)
         windows = windows[:, ::stride_h, ::stride_w, ...]
         k_flat = kH * kW * C
         patches = windows.reshape(N, out_h, out_w, k_flat)
 
-        # normalize kernel shape to (out_h, out_w, k_flat, filters)
         kernel = self.kernel
         if kernel.size == out_h * out_w * k_flat * self.filters:
             kernel_flat = kernel.reshape(out_h, out_w, k_flat, self.filters)
         elif kernel.size == k_flat * self.filters:
             kernel_shared_flat = kernel.reshape(k_flat, self.filters)
-            kernel_flat = np.broadcast_to(kernel_shared_flat, (out_h, out_w, k_flat, self.filters))
+            kernel_flat = xp.broadcast_to(kernel_shared_flat, (out_h, out_w, k_flat, self.filters))
         else:
-            kernel_flat = np.asarray(kernel)
-            try:
-                kernel_flat = kernel_flat.reshape(out_h, out_w, k_flat, self.filters)
-            except Exception as exc:
-                raise ValueError(f"Unexpected kernel shape: {kernel.shape}") from exc
+            kernel_flat = xp.asarray(kernel)
+            kernel_flat = kernel_flat.reshape(out_h, out_w, k_flat, self.filters)
 
-        # einsum over patch dim: (N, out_h, out_w, k) and (out_h, out_w, k, f) -> (N, out_h, out_w, f)
-        out = np.einsum("n o p k, o p k f -> n o p f", patches, kernel_flat)
+        # Convert einsum to batched matmul
+        # patches: (N, out_h, out_w, k_flat) -> transpose to (out_h, out_w, N, k_flat)
+        # kernel_flat: (out_h, out_w, k_flat, filters)
+        patches_reshaped = patches.transpose(1, 2, 0, 3) 
+        out = xp.matmul(patches_reshaped, kernel_flat) 
+        # out: (out_h, out_w, N, filters) -> transpose back to (N, out_h, out_w, filters)
+        out = out.transpose(2, 0, 1, 3)
 
         if self.use_bias:
             if self.bias is None:
@@ -234,12 +249,9 @@ class LocallyConnected2D:
             if b.size == out_h * out_w * self.filters:
                 b = b.reshape(out_h, out_w, self.filters)
             elif b.size == self.filters:
-                b = np.broadcast_to(b.reshape(self.filters), (out_h, out_w, self.filters))
+                b = xp.broadcast_to(b.reshape(self.filters), (out_h, out_w, self.filters))
             else:
-                try:
-                    b = b.reshape(out_h, out_w, self.filters)
-                except Exception:
-                    raise ValueError(f"Unexpected bias shape: {self.bias.shape}")
+                b = b.reshape(out_h, out_w, self.filters)
 
             out += b.reshape((1, out_h, out_w, self.filters))
 
