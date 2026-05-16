@@ -212,23 +212,54 @@ class CNNClassifier:
 		"""Set weights for the final classifier layer."""
 		self.output_layer.set_weights(weights, biases.reshape(1, -1))
 
-	def forward(self, x: np.ndarray) -> np.ndarray:
+	def _transfer_weights(self, xp) -> None:
+		"""Dynamically transfer weights to target device (numpy or cupy).
+		Handles both directions: numpy->cupy (GPU) and cupy->numpy (CPU).
+		"""
+		def _to(arr, xp):
+			if arr is None:
+				return None
+			if xp is np:
+				return arr.get() if hasattr(arr, 'get') else np.asarray(arr)
+			else:
+				return xp.asarray(arr)
+
+		for layer in self.conv_layers:
+			if layer.kernel is not None:
+				layer.kernel = _to(layer.kernel, xp)
+			if getattr(layer, 'bias', None) is not None:
+				layer.bias = _to(layer.bias, xp)
+		
+		self.output_layer.weights = _to(self.output_layer.weights, xp)
+		self.output_layer.biases = _to(self.output_layer.biases, xp)
+
+	def forward(self, x: np.ndarray, use_gpu: bool = False) -> np.ndarray:
 		"""Forward pass.
 
 		Args:
 			x: Input image batch in NHWC format `(N, H, W, C)` or a single
 			   image `(H, W, C)`.
+			use_gpu: If True, executes purely on GPU via CuPy if available, and returns a Numpy array to maintain spec compliance.
 
 		Returns:
 			Class probabilities with shape `(N, num_classes)`.
 		"""
-		x = np.asarray(x, dtype=np.float32)
-		if x.ndim == 3:
-			x = x[None, ...]
-		if x.ndim != 4:
-			raise ValueError(f"Expected input shape (N,H,W,C) or (H,W,C), got {x.shape}")
+		xp = np
+		if use_gpu:
+			try:
+				import cupy as xp
+			except ImportError:
+				pass
+		
+		self._transfer_weights(xp)
+		
+		x_xp = xp.asarray(x, dtype=xp.float32)
+		if x_xp.ndim == 3:
+			x_xp = x_xp[None, ...]
+		if x_xp.ndim != 4:
+			raise ValueError(f"Expected input shape (N,H,W,C) or (H,W,C), got {x_xp.shape}")
 
-		out = x
+		out = x_xp
 		self.intermediate_activations = []
 		for conv_layer, pool_layer in zip(self.conv_layers, self.pool_layers):
 			out = conv_layer.forward(out)
@@ -238,11 +269,17 @@ class CNNClassifier:
 
 		out = self.head_layer.forward(out)
 		out = self.output_layer.forward(out)
+		
+		if xp is not np:
+			# Convert intermediate activations back to CPU for Grad-CAM
+			self.intermediate_activations = [xp.asnumpy(act) for act in self.intermediate_activations]
+			return xp.asnumpy(out)
+			
 		return out
 
-	def predict(self, x: np.ndarray) -> np.ndarray:
+	def predict(self, x: np.ndarray, use_gpu: bool = False) -> np.ndarray:
 		"""Alias for forward()."""
-		return self.forward(x)
+		return self.forward(x, use_gpu=use_gpu)
 
 	def _backprop_to_last_conv(self, class_index: int) -> np.ndarray:
 		if not self.intermediate_activations:
